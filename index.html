@@ -420,10 +420,23 @@
     <!-- ==================== SCREEN 3: PREVIEW & SIGNATURE ==================== -->
     <div id="screen-3" class="hidden pb-10">
         
-        <div class="max-w-[210mm] mx-auto mb-6 flex justify-between items-center no-print">
-            <button onclick="setScreen('screen-2')" class="text-slate-600 hover:text-slate-800 font-semibold flex items-center gap-2 bg-white border border-slate-300 px-4 py-2 rounded-lg shadow-sm transition-colors">
-                <i class="fa-solid fa-arrow-left"></i> Edit Form
-            </button>
+        <div class="max-w-[210mm] mx-auto mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-200 no-print flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-4">
+                <button onclick="setScreen('screen-2')" class="text-slate-600 hover:text-slate-800 font-semibold flex items-center gap-2 bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-lg transition-colors">
+                    <i class="fa-solid fa-arrow-left"></i> Edit Form
+                </button>
+                <div class="h-8 w-px bg-slate-300"></div>
+                <div class="flex items-center gap-2">
+                    <label class="text-sm font-bold text-slate-700">Template:</label>
+                    <select id="template-selector" onchange="changeTemplate(this.value)" class="border border-slate-300 rounded-lg p-2 focus:border-teal-500 outline-none text-sm font-medium bg-slate-50 cursor-pointer">
+                        <option value="original">Template 1: Standard Comprehensive</option>
+                        <option value="modern">Template 2: Modern Teal</option>
+                        <option value="classic">Template 3: Executive Classic</option>
+                        <option value="editorial">Template 4: Editorial Vibrant</option>
+                        <option value="compact">Template 5: Compact Clean</option>
+                    </select>
+                </div>
+            </div>
             <button onclick="openSignatureModal()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-6 rounded-lg shadow-sm transition-colors flex items-center gap-2">
                 <i class="fa-solid fa-pen-nib"></i> Confirm & Sign
             </button>
@@ -431,152 +444,19 @@
 
         <!-- A4 Print Container -->
         <div class="a4-container" id="prescription-print">
-            <!-- Header -->
-            <div class="relative h-[220px] overflow-hidden">
-                <div class="header-shape-right"></div>
-                <div class="header-shape-left"></div>
-                <div class="header-shape-circle"><i class="fa-solid fa-user-doctor drop-shadow-md opacity-90"></i></div>
-                
-                <!-- Header Content -->
-                <div class="relative z-10 flex justify-between pt-8 px-10">
-                    <!-- Left Graphics placeholder -->
-                    <div class="w-32 h-32 relative z-20"></div>
-                    
-                    <!-- Right Doctor Info -->
-                    <div class="text-white text-right w-3/5 pt-2 pr-6 leading-snug">
-                        <h1 class="text-3xl font-serif font-bold mb-2 tracking-wide" id="print-doc-name">Dr. Name</h1>
-                        <p class="text-sm opacity-90 tracking-wide" id="print-doc-field">General Physician</p>
-                        <p class="text-[13px] font-semibold opacity-90 mt-1" id="print-doc-degrees">MBBS</p>
-                        <p class="text-[12px] opacity-80 mt-1">Reg. no.- <span id="print-doc-reg">12345</span></p>
-                    </div>
-                </div>
-                
-                <!-- Date -->
-                <div class="absolute bottom-1 right-10 text-sm font-semibold z-10 text-slate-800">
-                    DATE: <span class="input-dashed inline-block w-32 text-center" id="print-top-date"></span>
-                </div>
-            </div>
-            
-            <!-- Patient Banner -->
-            <div class="px-10 py-3 border-y-2 border-slate-300 mx-6 my-2 text-[13px] font-semibold flex flex-wrap gap-y-3">
-                <div class="w-full flex items-end">
-                    <span class="mr-2">NAME:</span>
-                    <span class="input-dashed flex-grow text-center text-[15px] font-bold text-slate-900 pb-0.5 uppercase tracking-wide" id="print-pat-name"></span>
-                    <span class="ml-4 mr-2">AGE:</span>
-                    <span class="input-dashed w-16 text-center pb-0.5" id="print-pat-age"></span>
-                    <span class="ml-4 mr-2">SEX:</span>
-                    <span class="input-dashed w-12 text-center pb-0.5" id="print-pat-sex"></span>
-                    <span class="ml-4 mr-2">WEIGHT:</span>
-                    <span class="input-dashed w-16 text-center pb-0.5" id="print-pat-weight"></span>
-                </div>
-                <div class="w-full flex items-end mt-2">
-                    <span class="mr-2">ADDRESS:</span>
-                    <span class="input-dashed flex-grow pb-0.5 font-normal" id="print-pat-address"></span>
-                </div>
-            </div>
-            
-            <!-- Body -->
-            <div class="px-10 flex relative" style="min-height: 170mm;">
-                <!-- Watermark Removed -->
-                
-                <!-- Left Column -->
-                <div class="w-[35%] pr-5 pt-4 border-r border-slate-300 relative z-10 flex flex-col gap-5">
-                    
-                    <!-- Symptoms -->
-                    <div id="print-symptoms-section" class="hidden">
-                        <h4 class="font-bold text-slate-800 underline mb-1 tracking-wide">Symptoms</h4>
-                        <p class="text-sm whitespace-pre-wrap text-slate-700" id="print-symptoms"></p>
-                    </div>
-                    
-                    <!-- O/E -->
-                    <div id="print-oe-section" class="hidden">
-                        <h4 class="font-bold text-slate-800 underline mb-1 tracking-wide">O/E</h4>
-                        <ul class="text-[13px] space-y-1 font-medium text-slate-800" id="print-vitals-list">
-                            <!-- populated via js -->
-                        </ul>
-                        <p class="text-sm whitespace-pre-wrap mt-2 text-slate-700" id="print-vitals-other"></p>
-                    </div>
-                    
-                    <!-- Clinical Notes -->
-                    <div id="print-notes-section" class="hidden">
-                        <h4 class="font-bold text-slate-800 underline mb-1 tracking-wide">Clinical Notes</h4>
-                        <ol class="list-decimal list-outside ml-4 text-[13px] space-y-1.5 text-slate-700" id="print-notes-list">
-                            <!-- populated via js -->
-                        </ol>
-                    </div>
-                    
-                    <!-- Investigations -->
-                    <div id="print-investigations-section" class="hidden">
-                        <h4 class="font-bold text-slate-800 underline mb-1 tracking-wide">Investigations</h4>
-                        <p class="text-sm whitespace-pre-wrap text-slate-700" id="print-investigations"></p>
-                    </div>
-                </div>
-                
-                <!-- Right Column -->
-                <div class="w-[65%] pl-6 pt-2 relative z-10 flex flex-col">
-                    <div class="rx-symbol text-slate-900">Rx</div>
-                    
-                    <!-- Medicines -->
-                    <div class="mt-2">
-                        <table class="w-full text-left text-[12.5px] text-slate-800 border-collapse">
-                            <thead>
-                                <tr class="border-b border-slate-300 text-slate-600 font-bold">
-                                    <th class="py-1">Medicine Name</th>
-                                    <th class="py-1">Dose</th>
-                                    <th class="py-1">Timing</th>
-                                    <th class="py-1">Days</th>
-                                </tr>
-                            </thead>
-                            <tbody id="print-medicines-list">
-                                <!-- populated via js -->
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <!-- Advices -->
-                    <div class="mt-4 hidden" id="print-advices-section">
-                        <h4 class="font-bold text-slate-800 underline mb-2 tracking-wide">Advices</h4>
-                        <ol class="list-decimal list-outside ml-5 text-[13px] space-y-1.5 text-slate-700" id="print-advices-list">
-                            <!-- populated via js -->
-                        </ol>
-                    </div>
-                    
-                    <!-- Follow Up -->
-                    <div class="mt-4 text-[13px] font-semibold text-slate-800 hidden" id="print-followup-section">
-                        Follow-up check on: <span class="input-dashed inline-block w-32 text-center text-teal-800 font-bold" id="print-followup"></span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Footer -->
-            <div class="absolute bottom-0 w-full px-10 py-5 flex justify-between items-end border-t-[10px] border-coral bg-white">
-                <!-- Left: Clinic Info -->
-                <div class="flex items-center gap-3 w-3/5 relative z-10">
-                    <div class="bg-blue-100 rounded-full w-8 h-8 flex justify-center items-center text-coral flex-shrink-0">
-                        <i class="fa-solid fa-plus font-bold text-sm"></i>
-                    </div>
-                    <div>
-                        <p class="text-[13px] font-bold text-slate-800 tracking-wide" id="print-doc-phone"></p>
-                        <p class="text-[11px] text-slate-600 whitespace-pre-wrap leading-tight mt-0.5" id="print-doc-address"></p>
-                    </div>
-                </div>
-                
-                <!-- Right: Signature -->
-                <div class="w-[30%] flex flex-col items-center relative z-10">
-                    <div class="h-16 w-full border-b border-slate-400 flex justify-center items-end pb-1 relative">
-                        <img id="print-signature-img" src="" class="max-h-16 hidden absolute bottom-0 object-contain" />
-                    </div>
-                    <p class="text-[11px] mt-1 font-bold text-slate-800 uppercase tracking-widest">Signature</p>
-                    <p class="text-[10px] mt-1 text-slate-600 font-medium" id="print-bottom-date"></p>
-                </div>
-                <!-- Right decorative shape removed -->
-            </div>
+            <!-- Dynamic Template Content -->
+        </div>
         </div>
 
         <div id="download-actions" class="hidden mt-8 flex justify-center no-print">
             <button onclick="downloadPDF()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105 flex items-center gap-2 text-lg">
                 <i class="fa-solid fa-download"></i> Download Print-Ready PDF
             </button>
+        </div>
+        
+        <!-- Global Web App Footer (No Print) -->
+        <div class="mt-8 mb-4 w-full text-center text-xs text-slate-400 font-medium tracking-wide no-print">
+            Made with ❤️ by Swaraj
         </div>
     </div>
 
@@ -603,6 +483,7 @@
 <script>
     // State Management
     let appState = {
+        template: sessionStorage.getItem('selectedTemplate') || 'original',
         doctor: {
             name: '', regNo: '', field: 'General Physician', specialization: '',
             degrees: [], otherDegree: '', phone: '', address: ''
@@ -888,143 +769,430 @@
             return;
         }
 
+        document.getElementById('template-selector').value = appState.template;
         populatePrintTemplate();
         setScreen('screen-3');
     }
 
+    function changeTemplate(val) {
+        appState.template = val;
+        sessionStorage.setItem('selectedTemplate', val);
+        populatePrintTemplate();
+    }
+
     function populatePrintTemplate() {
-        // Doctor
-        document.getElementById('print-doc-name').innerText = appState.doctor.name;
-        document.getElementById('print-doc-field').innerText = appState.doctor.field === 'Specialist' ? appState.doctor.specialization : appState.doctor.field;
+        let html = '';
         
+        // Common Data Prep
+        const docName = appState.doctor.name;
+        const docField = appState.doctor.field === 'Specialist' ? appState.doctor.specialization : appState.doctor.field;
         let degString = appState.doctor.degrees.join(', ');
         if(appState.doctor.otherDegree) degString += (degString?', ':'') + appState.doctor.otherDegree;
-        document.getElementById('print-doc-degrees').innerText = degString;
+        const docReg = appState.doctor.regNo;
+        const docPhone = appState.doctor.phone;
+        const docAddress = appState.doctor.address;
         
-        document.getElementById('print-doc-reg').innerText = appState.doctor.regNo;
-        document.getElementById('print-doc-phone').innerText = appState.doctor.phone;
-        document.getElementById('print-doc-address').innerText = appState.doctor.address;
-
-        // Patient
-        // Format Date
         let dateParts = appState.patient.date.split('-');
-        let displayDate = dateParts.length === 3 ? `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}` : appState.patient.date;
+        const displayDate = dateParts.length === 3 ? `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}` : appState.patient.date;
         
-        document.getElementById('print-top-date').innerText = displayDate;
-        document.getElementById('print-bottom-date').innerText = displayDate;
+        const pName = appState.patient.name;
+        const pAge = appState.patient.age;
+        const pSex = appState.patient.sex;
+        const pWeight = appState.patient.weight;
+        const pAddress = appState.patient.address;
         
-        document.getElementById('print-pat-name').innerText = appState.patient.name;
-        document.getElementById('print-pat-age').innerText = appState.patient.age;
-        document.getElementById('print-pat-sex').innerText = appState.patient.sex;
-        document.getElementById('print-pat-weight').innerText = appState.patient.weight;
-        document.getElementById('print-pat-address').innerText = appState.patient.address;
-
-        // Left Column Data
+        // Left Column Content (OE, Notes)
+        let leftColHtml = '';
         let symptoms = document.getElementById('clin-symptoms').value.trim();
-        if(symptoms) {
-            document.getElementById('print-symptoms').innerText = symptoms;
-            document.getElementById('print-symptoms-section').classList.remove('hidden');
-        } else {
-            document.getElementById('print-symptoms-section').classList.add('hidden');
-        }
-
-        // Vitals
+        if(symptoms) leftColHtml += `
+            <div class="mb-4">
+                <h4 class="font-bold text-sm text-slate-800 underline mb-1 tracking-wide">Symptoms</h4>
+                <p class="text-[13px] whitespace-pre-wrap text-slate-700">${symptoms}</p>
+            </div>`;
+            
         let bpSys = document.getElementById('vital-bp-sys').value;
         let bpDia = document.getElementById('vital-bp-dia').value;
         let pr = document.getElementById('vital-pr').value;
         let spo2 = document.getElementById('vital-spo2').value;
         let otherVit = document.getElementById('vital-other').value.trim();
+        let vitalsHtml = '';
+        if(bpSys && bpDia) vitalsHtml += `<li>BP - ${bpSys}/${bpDia} mmHg</li>`;
+        if(pr) vitalsHtml += `<li>PR - ${pr} bpm</li>`;
+        if(spo2) vitalsHtml += `<li>SpO2 - ${spo2}%</li>`;
+        if(vitalsHtml || otherVit) {
+            leftColHtml += `
+            <div class="mb-4">
+                <h4 class="font-bold text-sm text-slate-800 underline mb-1 tracking-wide">O/E</h4>
+                <ul class="text-[12px] space-y-1 font-medium text-slate-800">${vitalsHtml}</ul>
+                ${otherVit ? `<p class="text-[12px] whitespace-pre-wrap mt-1 text-slate-700">${otherVit}</p>` : ''}
+            </div>`;
+        }
         
-        let vitalsList = document.getElementById('print-vitals-list');
-        vitalsList.innerHTML = '';
-        let hasVitals = false;
-        if(bpSys && bpDia) { vitalsList.innerHTML += `<li>BP - ${bpSys}/${bpDia} mmHg</li>`; hasVitals = true; }
-        if(pr) { vitalsList.innerHTML += `<li>PR - ${pr} bpm</li>`; hasVitals = true; }
-        if(spo2) { vitalsList.innerHTML += `<li>SpO2 - ${spo2}%</li>`; hasVitals = true; }
-        
-        document.getElementById('print-vitals-other').innerText = otherVit;
-        if(otherVit) hasVitals = true;
-
-        if(hasVitals) document.getElementById('print-oe-section').classList.remove('hidden');
-        else document.getElementById('print-oe-section').classList.add('hidden');
-
-        // Clinical Notes
-        let notesList = document.getElementById('print-notes-list');
-        notesList.innerHTML = '';
         let validNotes = appState.clinical.notes.filter(n => n.trim() !== '');
         if(validNotes.length > 0) {
-            validNotes.forEach(n => {
-                notesList.innerHTML += `<li>${n}</li>`;
-            });
-            document.getElementById('print-notes-section').classList.remove('hidden');
-        } else {
-            document.getElementById('print-notes-section').classList.add('hidden');
+            let nList = validNotes.map(n => `<li>${n}</li>`).join('');
+            leftColHtml += `
+            <div class="mb-4">
+                <h4 class="font-bold text-sm text-slate-800 underline mb-1 tracking-wide">Clinical Notes</h4>
+                <ol class="list-decimal list-outside ml-4 text-[12px] space-y-1 text-slate-700">${nList}</ol>
+            </div>`;
         }
-
-        // Investigations
+        
         let inves = document.getElementById('clin-investigations').value.trim();
-        if(inves) {
-            document.getElementById('print-investigations').innerText = inves;
-            document.getElementById('print-investigations-section').classList.remove('hidden');
-        } else {
-            document.getElementById('print-investigations-section').classList.add('hidden');
-        }
-
-        // Medicines
-        let printRxList = document.getElementById('print-medicines-list');
-        printRxList.innerHTML = '';
+        if(inves) leftColHtml += `
+            <div class="mb-4">
+                <h4 class="font-bold text-sm text-slate-800 underline mb-1 tracking-wide">Investigations</h4>
+                <p class="text-[13px] whitespace-pre-wrap text-slate-700">${inves}</p>
+            </div>`;
+            
+        // Right Column Content (Rx, Advices)
+        let rightColHtml = '';
+        let rxRows = '';
         appState.rx.forEach(med => {
-            if(med.isEditing || !med.name) return; // skip empty/unsaved
-            
+            if(med.isEditing || !med.name) return;
             let actualDose = med.dose === 'Other' ? med.doseOther : med.dose;
-            
-            let notesHtml = '';
-            if(med.notes) notesHtml = `<div class="text-[11px] text-slate-500 italic mt-0.5">${med.notes}</div>`;
-            
-            printRxList.innerHTML += `
+            let notesHtml = med.notes ? `<div class="text-[11px] text-slate-500 italic mt-0.5">${med.notes}</div>` : '';
+            rxRows += `
                 <tr class="border-b border-slate-100 last:border-0 align-top">
                     <td class="py-2 pr-2">
                         <div class="font-bold text-[14px] text-slate-800">${med.name}</div>
                         ${notesHtml}
                     </td>
-                    <td class="py-2 pr-2 font-medium">${actualDose} tab</td>
-                    <td class="py-2 pr-2">
+                    <td class="py-2 pr-2 font-medium text-[13px]">${actualDose} tab</td>
+                    <td class="py-2 pr-2 text-[13px]">
                         <span class="font-semibold">${med.freq1}</span><br>
                         <span class="text-[11px] text-slate-600">${med.freq2}</span>
                     </td>
-                    <td class="py-2 font-semibold">${med.duration}</td>
-                </tr>
-            `;
+                    <td class="py-2 font-semibold text-[13px]">${med.duration}</td>
+                </tr>`;
         });
-
-        // Advices
-        let pAdvicesList = document.getElementById('print-advices-list');
-        pAdvicesList.innerHTML = '';
+        
+        if(rxRows) {
+            rightColHtml += `
+            <div class="mt-2 mb-6">
+                <table class="w-full text-left text-slate-800 border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-300 text-[12px] text-slate-600 font-bold uppercase tracking-wide">
+                            <th class="py-1">Medicine Name</th>
+                            <th class="py-1">Dose</th>
+                            <th class="py-1">Timing</th>
+                            <th class="py-1">Days</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rxRows}</tbody>
+                </table>
+            </div>`;
+        }
+        
         let validAdvices = appState.clinical.advices.filter(a => a.trim() !== '');
         if(validAdvices.length > 0) {
-            validAdvices.forEach(a => {
-                pAdvicesList.innerHTML += `<li>${a}</li>`;
-            });
-            document.getElementById('print-advices-section').classList.remove('hidden');
-        } else {
-            document.getElementById('print-advices-section').classList.add('hidden');
+            let aList = validAdvices.map(a => `<li>${a}</li>`).join('');
+            rightColHtml += `
+            <div class="mb-6">
+                <h4 class="font-bold text-sm text-slate-800 underline mb-2 tracking-wide">Advices</h4>
+                <ol class="list-decimal list-outside ml-5 text-[13px] space-y-1.5 text-slate-700">${aList}</ol>
+            </div>`;
         }
-
-        // Follow Up
+        
         let fDate = document.getElementById('follow-date').value;
         if(fDate) {
             let fdParts = fDate.split('-');
             let fDisplay = fdParts.length === 3 ? `${fdParts[2]}/${fdParts[1]}/${fdParts[0]}` : fDate;
-            document.getElementById('print-followup').innerText = fDisplay;
-            document.getElementById('print-followup-section').classList.remove('hidden');
-        } else {
-            document.getElementById('print-followup-section').classList.add('hidden');
+            rightColHtml += `
+            <div class="text-[13px] font-semibold text-slate-800">
+                Follow-up check on: <span class="border-b border-dashed border-slate-400 inline-block text-center text-teal-800 font-bold px-2">${fDisplay}</span>
+            </div>`;
         }
         
-        // Reset signature if not drawn
-        if(!appState.signatureDataUrl) {
-            document.getElementById('print-signature-img').classList.add('hidden');
+        // Footer Signature HTML
+        const sigHtml = appState.signatureDataUrl ? `<img src="${appState.signatureDataUrl}" class="max-h-16 absolute bottom-0 object-contain" />` : '';
+        const globalFooter = '';
+
+        // ================= TEMPLATE RENDERING =================
+        if(appState.template === 'original') {
+            html = `
+                <div class="relative h-[220px] overflow-hidden bg-white">
+                    <div class="absolute top-0 right-0 w-[65%] h-[180px] bg-red-400 rounded-bl-full z-0"></div>
+                    <div class="absolute top-[-50px] left-[-50px] w-[300px] h-[300px] bg-cyan-200 rounded-full z-0"></div>
+                    <div class="absolute top-[130px] left-[50px] w-[120px] h-[120px] bg-red-400 rounded-full z-10 flex justify-center items-center text-white text-[3rem]">
+                        <i class="fa-solid fa-user-doctor drop-shadow-md opacity-90"></i>
+                    </div>
+                    <div class="relative z-20 flex justify-between pt-8 px-10">
+                        <div class="w-32 h-32"></div>
+                        <div class="text-white text-right w-3/5 pt-2 pr-6 leading-snug">
+                            <h1 class="text-3xl font-serif font-bold mb-2 tracking-wide">${docName}</h1>
+                            <p class="text-sm opacity-90 tracking-wide">${docField}</p>
+                            <p class="text-[13px] font-semibold opacity-90 mt-1">${degString}</p>
+                            <p class="text-[12px] opacity-80 mt-1">Reg. no.- ${docReg}</p>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-1 right-10 text-sm font-semibold z-20 text-slate-800">
+                        DATE: <span class="border-b border-dashed border-slate-400 inline-block w-32 text-center pb-0.5">${displayDate}</span>
+                    </div>
+                </div>
+                <div class="px-10 py-3 border-y border-slate-300 mx-6 my-2 text-[13px] font-semibold flex flex-wrap gap-y-3 bg-slate-50 rounded-sm">
+                    <div class="w-full flex items-end">
+                        <span class="mr-2 text-slate-500">NAME:</span>
+                        <span class="flex-grow text-[15px] font-bold text-slate-900 border-b border-dashed border-slate-300 uppercase tracking-wide pb-0.5">${pName}</span>
+                        <span class="ml-4 mr-2 text-slate-500">AGE:</span>
+                        <span class="w-12 text-center border-b border-dashed border-slate-300 pb-0.5">${pAge}</span>
+                        <span class="ml-4 mr-2 text-slate-500">SEX:</span>
+                        <span class="w-12 text-center border-b border-dashed border-slate-300 pb-0.5">${pSex}</span>
+                        <span class="ml-4 mr-2 text-slate-500">WEIGHT:</span>
+                        <span class="w-16 text-center border-b border-dashed border-slate-300 pb-0.5">${pWeight ? pWeight+' kg' : ''}</span>
+                    </div>
+                    <div class="w-full flex items-end mt-1">
+                        <span class="mr-2 text-slate-500">ADDRESS:</span>
+                        <span class="flex-grow border-b border-dashed border-slate-300 font-normal text-slate-700 pb-0.5">${pAddress}</span>
+                    </div>
+                </div>
+                <div class="px-10 flex relative" style="min-height: 160mm;">
+                    <div class="w-[35%] pr-5 pt-4 border-r border-slate-200 relative flex flex-col gap-5">
+                        ${leftColHtml}
+                    </div>
+                    <div class="w-[65%] pl-6 pt-2 relative flex flex-col">
+                        <div class="text-[3.5rem] font-serif font-bold text-slate-800 leading-none mb-2">Rx</div>
+                        ${rightColHtml}
+                    </div>
+                </div>
+                <div class="absolute bottom-0 w-full px-10 py-5 flex justify-between items-end border-t-[8px] border-cyan-200 bg-white pb-8">
+                    <div class="flex items-center gap-3 w-3/5">
+                        <div class="bg-slate-200 rounded-full w-8 h-8 flex justify-center items-center text-slate-800 flex-shrink-0">
+                            <i class="fa-solid fa-plus font-bold text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-[13px] font-bold text-slate-800 tracking-wide">${docPhone}</p>
+                            <p class="text-[11px] text-slate-600 whitespace-pre-wrap leading-tight mt-0.5">${docAddress}</p>
+                        </div>
+                    </div>
+                    <div class="w-[30%] flex flex-col items-center">
+                        <div class="h-16 w-full border-b border-slate-300 flex justify-center items-end pb-1 relative">
+                            ${sigHtml}
+                        </div>
+                        <p class="text-[12px] mt-1 font-bold text-slate-800">${docName}</p>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-widest">Signature</p>
+                    </div>
+                </div>
+            `;
+        } 
+        else if(appState.template === 'modern') {
+            html = `
+                <div class="relative h-[220px] overflow-hidden bg-white">
+                    <div class="absolute top-0 right-0 w-[65%] h-[180px] bg-[#0f766e] rounded-bl-full z-0"></div>
+                    <div class="absolute top-[-50px] left-[-50px] w-[300px] h-[300px] bg-[#ccfbf1] rounded-full z-0"></div>
+                    <div class="absolute top-[130px] left-[50px] w-[120px] h-[120px] bg-[#0f766e] rounded-full z-10 flex justify-center items-center text-white text-[3rem]">
+                        <i class="fa-solid fa-user-doctor drop-shadow-md opacity-90"></i>
+                    </div>
+                    <div class="relative z-20 flex justify-between pt-8 px-10">
+                        <div class="w-32 h-32"></div>
+                        <div class="text-white text-right w-3/5 pt-2 pr-6 leading-snug">
+                            <h1 class="text-3xl font-serif font-bold mb-2 tracking-wide">${docName}</h1>
+                            <p class="text-sm opacity-90 tracking-wide">${docField}</p>
+                            <p class="text-[13px] font-semibold opacity-90 mt-1">${degString}</p>
+                            <p class="text-[12px] opacity-80 mt-1">Reg. no.- ${docReg}</p>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-1 right-10 text-sm font-semibold z-20 text-slate-800">
+                        DATE: <span class="border-b border-dashed border-slate-400 inline-block w-32 text-center pb-0.5">${displayDate}</span>
+                    </div>
+                </div>
+                <div class="px-10 py-3 border-y border-slate-300 mx-6 my-2 text-[13px] font-semibold flex flex-wrap gap-y-3 bg-slate-50 rounded-sm">
+                    <div class="w-full flex items-end">
+                        <span class="mr-2 text-slate-500">NAME:</span>
+                        <span class="flex-grow text-[15px] font-bold text-slate-900 border-b border-dashed border-slate-300 uppercase tracking-wide pb-0.5">${pName}</span>
+                        <span class="ml-4 mr-2 text-slate-500">AGE:</span>
+                        <span class="w-12 text-center border-b border-dashed border-slate-300 pb-0.5">${pAge}</span>
+                        <span class="ml-4 mr-2 text-slate-500">SEX:</span>
+                        <span class="w-12 text-center border-b border-dashed border-slate-300 pb-0.5">${pSex}</span>
+                        <span class="ml-4 mr-2 text-slate-500">WEIGHT:</span>
+                        <span class="w-16 text-center border-b border-dashed border-slate-300 pb-0.5">${pWeight ? pWeight+' kg' : ''}</span>
+                    </div>
+                    <div class="w-full flex items-end mt-1">
+                        <span class="mr-2 text-slate-500">ADDRESS:</span>
+                        <span class="flex-grow border-b border-dashed border-slate-300 font-normal text-slate-700 pb-0.5">${pAddress}</span>
+                    </div>
+                </div>
+                <div class="px-10 flex relative" style="min-height: 160mm;">
+                    <div class="w-[35%] pr-5 pt-4 border-r border-slate-200 relative flex flex-col gap-5">
+                        ${leftColHtml}
+                    </div>
+                    <div class="w-[65%] pl-6 pt-2 relative flex flex-col">
+                        <div class="text-[3.5rem] font-serif font-bold text-[#0f766e] leading-none mb-2">Rx</div>
+                        ${rightColHtml}
+                    </div>
+                </div>
+                <div class="absolute bottom-0 w-full px-10 py-5 flex justify-between items-end border-t-[8px] border-[#0f766e] bg-white pb-8">
+                    <div class="flex items-center gap-3 w-3/5">
+                        <div class="bg-[#ccfbf1] rounded-full w-8 h-8 flex justify-center items-center text-[#0f766e] flex-shrink-0">
+                            <i class="fa-solid fa-plus font-bold text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-[13px] font-bold text-slate-800 tracking-wide">${docPhone}</p>
+                            <p class="text-[11px] text-slate-600 whitespace-pre-wrap leading-tight mt-0.5">${docAddress}</p>
+                        </div>
+                    </div>
+                    <div class="w-[30%] flex flex-col items-center">
+                        <div class="h-16 w-full border-b border-slate-300 flex justify-center items-end pb-1 relative">
+                            ${sigHtml}
+                        </div>
+                        <p class="text-[12px] mt-1 font-bold text-slate-800">${docName}</p>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-widest">Signature</p>
+                    </div>
+                </div>
+                ${globalFooter}
+            `;
+        } 
+        else if(appState.template === 'classic') {
+            html = `
+                <div class="relative pt-12 pb-6 px-12 bg-white text-center border-b-[3px] border-[#1e293b]">
+                    <h1 class="text-4xl font-serif font-bold text-[#1e293b] tracking-wider mb-2 uppercase">${docName}</h1>
+                    <p class="text-[15px] font-serif font-semibold text-slate-700 tracking-widest uppercase mb-1">${docField}</p>
+                    <p class="text-[13px] font-serif text-slate-600 mb-1">${degString}</p>
+                    <p class="text-[12px] font-serif text-slate-500">Reg: ${docReg}</p>
+                </div>
+                <div class="px-12 py-4 flex justify-between items-end">
+                    <div class="text-[13px] font-serif font-semibold text-[#1e293b]">
+                        Date: <span class="ml-2 font-normal border-b border-slate-400 inline-block w-24 text-center pb-0.5">${displayDate}</span>
+                    </div>
+                </div>
+                <div class="mx-12 border border-[#1e293b] p-3 mb-6 text-[13px] font-serif bg-slate-50/50">
+                    <div class="grid grid-cols-4 gap-y-2 gap-x-4">
+                        <div class="col-span-4 md:col-span-2 flex"><span class="font-bold mr-2 text-[#1e293b]">Name:</span> <span class="flex-grow border-b border-slate-300 font-sans uppercase pl-2">${pName}</span></div>
+                        <div class="flex"><span class="font-bold mr-2 text-[#1e293b]">Age:</span> <span class="flex-grow border-b border-slate-300 font-sans text-center">${pAge}</span></div>
+                        <div class="flex"><span class="font-bold mr-2 text-[#1e293b]">Sex:</span> <span class="flex-grow border-b border-slate-300 font-sans text-center">${pSex}</span></div>
+                        <div class="col-span-4 flex"><span class="font-bold mr-2 text-[#1e293b]">Address:</span> <span class="flex-grow border-b border-slate-300 font-sans pl-2">${pAddress}</span></div>
+                    </div>
+                </div>
+                <div class="px-12 flex relative" style="min-height: 160mm;">
+                    <div class="w-[30%] pr-6 pt-2 border-r-2 border-[#1e293b] flex flex-col gap-6">
+                        ${leftColHtml}
+                    </div>
+                    <div class="w-[70%] pl-8 pt-0 flex flex-col">
+                        <div class="text-[4rem] font-serif font-bold text-[#1e293b] leading-none mb-4 italic">Rx</div>
+                        ${rightColHtml}
+                    </div>
+                </div>
+                <div class="absolute bottom-0 w-full px-12 py-6 flex justify-between items-end border-t border-[#1e293b] bg-white pb-8">
+                    <div class="w-3/5 font-serif">
+                        <p class="text-[12px] font-bold text-[#1e293b] uppercase tracking-widest mb-1">Clinic Contact</p>
+                        <p class="text-[12px] text-slate-700 font-semibold">${docPhone}</p>
+                        <p class="text-[11px] text-slate-600 whitespace-pre-wrap leading-relaxed">${docAddress}</p>
+                    </div>
+                    <div class="w-[30%] flex flex-col items-center">
+                        <div class="h-16 w-full border-b border-slate-800 flex justify-center items-end pb-1 relative">
+                            ${sigHtml}
+                        </div>
+                        <p class="text-[13px] mt-2 font-serif font-bold text-[#1e293b]">${docName}</p>
+                        <p class="text-[11px] mt-0.5 font-serif text-slate-600 uppercase tracking-widest">Signature</p>
+                    </div>
+                </div>
+                ${globalFooter}
+            `;
         }
+        else if(appState.template === 'editorial') {
+            html = `
+                <div class="px-10 py-10 bg-[#eef2ff] border-b-[4px] border-[#4338ca] flex justify-between items-center relative overflow-hidden">
+                    <div class="absolute right-[-40px] top-[-40px] opacity-10">
+                        <i class="fa-solid fa-briefcase-medical text-[250px] text-[#4338ca]"></i>
+                    </div>
+                    <div class="w-2/3 relative z-10">
+                        <h1 class="text-4xl font-extrabold text-[#4338ca] mb-1 tracking-tight">${docName}</h1>
+                        <p class="text-[16px] font-bold text-slate-700 tracking-wide">${docField}</p>
+                        <p class="text-[13px] font-semibold text-slate-600 mt-1">${degString}</p>
+                    </div>
+                    <div class="w-1/3 relative z-10 text-right">
+                        <div class="inline-block bg-white p-3 rounded-xl shadow-sm border border-[#c7d2fe]">
+                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Registration</p>
+                            <p class="text-[13px] font-bold text-[#4338ca]">${docReg}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mx-8 mt-6 bg-white border border-[#e0e7ff] rounded-2xl p-4 shadow-[0_4px_20px_-10px_rgba(67,56,202,0.15)] relative z-20 flex flex-wrap items-center justify-between text-[13px]">
+                    <div class="w-full mb-3 flex justify-between items-center border-b border-slate-100 pb-2">
+                        <div class="font-bold text-[16px] text-slate-800 uppercase tracking-wide">${pName}</div>
+                        <div class="bg-[#4338ca] text-white px-3 py-1 rounded-full font-bold text-[11px]">${displayDate}</div>
+                    </div>
+                    <div class="flex gap-6 w-full text-slate-600">
+                        <div><span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-0.5">Age</span><span class="font-semibold text-slate-800">${pAge}</span></div>
+                        <div><span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-0.5">Sex</span><span class="font-semibold text-slate-800">${pSex}</span></div>
+                        ${pWeight ? `<div><span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-0.5">Weight</span><span class="font-semibold text-slate-800">${pWeight} kg</span></div>` : ''}
+                        <div class="flex-grow text-right"><span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-0.5">Address</span><span class="font-medium text-slate-700">${pAddress || '-'}</span></div>
+                    </div>
+                </div>
+                <div class="px-10 mt-6 flex relative" style="min-height: 150mm;">
+                    <div class="w-[30%] pr-6 pt-2 border-r border-slate-200 flex flex-col gap-5">
+                        ${leftColHtml}
+                    </div>
+                    <div class="w-[70%] pl-8 pt-0 flex flex-col">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="bg-[#4338ca] text-white w-10 h-10 rounded-lg flex justify-center items-center font-serif text-2xl font-bold italic">Rx</div>
+                            <div class="h-px bg-slate-200 flex-grow"></div>
+                        </div>
+                        ${rightColHtml}
+                    </div>
+                </div>
+                <div class="absolute bottom-0 w-full px-10 py-6 bg-slate-50 border-t border-slate-200 flex justify-between items-end pb-8">
+                    <div class="w-1/2">
+                        <div class="flex items-center gap-2 mb-1">
+                            <i class="fa-solid fa-phone text-[#4338ca] text-sm"></i>
+                            <span class="text-[12px] font-bold text-slate-700">${docPhone}</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fa-solid fa-location-dot text-[#4338ca] text-sm mt-0.5"></i>
+                            <span class="text-[11px] text-slate-600 font-medium">${docAddress}</span>
+                        </div>
+                    </div>
+                    <div class="w-[30%] flex flex-col items-center">
+                        <div class="h-16 w-full border-b-2 border-slate-300 flex justify-center items-end pb-1 relative">
+                            ${sigHtml}
+                        </div>
+                        <p class="text-[12px] mt-2 font-bold text-slate-700">${docName}</p>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-widest">Signature</p>
+                    </div>
+                </div>
+                ${globalFooter}
+            `;
+        }
+        else if(appState.template === 'compact') {
+            html = `
+                <div class="px-8 pt-8 pb-3 border-b-2 border-[#374151] flex justify-between items-end bg-white">
+                    <div>
+                        <h1 class="text-2xl font-bold text-[#374151] uppercase tracking-tight leading-none mb-1">${docName}</h1>
+                        <p class="text-[12px] font-bold text-slate-600 uppercase tracking-widest">${docField}</p>
+                        <p class="text-[11px] font-medium text-slate-500 mt-0.5">${degString} | Reg: ${docReg}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[11px] font-bold text-slate-600"><i class="fa-solid fa-phone mr-1"></i>${docPhone}</p>
+                        <p class="text-[10px] text-slate-500 max-w-[200px] truncate mt-0.5">${docAddress.replace(/\\n/g, ', ')}</p>
+                    </div>
+                </div>
+                <div class="px-8 py-2 border-b border-slate-200 bg-slate-50 flex items-center justify-between text-[11px] font-medium uppercase tracking-wider text-slate-600">
+                    <div><span class="font-bold text-slate-800">${pName}</span> &nbsp;|&nbsp; ${pAge} / ${pSex} &nbsp;|&nbsp; ${pWeight?pWeight+' kg':''}</div>
+                    <div>DATE: <span class="font-bold text-slate-800">${displayDate}</span></div>
+                </div>
+                <div class="px-8 pt-4 flex relative" style="min-height: 180mm;">
+                    <div class="w-[30%] pr-4 border-r border-slate-200 flex flex-col gap-4">
+                        ${leftColHtml}
+                    </div>
+                    <div class="w-[70%] pl-5 pt-0 flex flex-col">
+                        <div class="text-2xl font-serif font-bold text-[#374151] mb-2 border-b border-slate-200 pb-1">Rx</div>
+                        ${rightColHtml}
+                    </div>
+                </div>
+                <div class="absolute bottom-0 w-full px-8 py-4 bg-white flex justify-end items-end pb-6 border-t border-slate-200">
+                    <div class="w-[25%] flex flex-col items-center">
+                        <div class="h-12 w-full border-b border-slate-400 flex justify-center items-end pb-1 relative">
+                            ${sigHtml}
+                        </div>
+                        <p class="text-[11px] mt-1 font-bold text-slate-700">${docName}</p>
+                        <p class="text-[9px] text-slate-500 uppercase tracking-widest">Signature</p>
+                    </div>
+                </div>
+                ${globalFooter}
+            `;
+        }
+
+        document.getElementById('prescription-print').innerHTML = html;
     }
 
 
@@ -1123,14 +1291,12 @@
     function clearSignature() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         appState.signatureDataUrl = null;
-        document.getElementById('print-signature-img').classList.add('hidden');
+        populatePrintTemplate();
     }
 
     function saveSignature() {
         appState.signatureDataUrl = canvas.toDataURL('image/png');
-        const imgEl = document.getElementById('print-signature-img');
-        imgEl.src = appState.signatureDataUrl;
-        imgEl.classList.remove('hidden');
+        populatePrintTemplate();
         closeSignatureModal();
         
         // Show download button once signed
