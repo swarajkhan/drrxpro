@@ -11,6 +11,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- html2pdf -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Supabase JS Client library CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Initializing with project specific credentials
+        const SUPABASE_URL = "https://fpmxmzrnvxcuuhiostkl.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_ClGUdlOzQEZGMobCq3mang_PlNDn9XD";
+        let supabaseClient = null;
+        try {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } catch(e) { console.error("Supabase Initialization Deferred:", e); }
+        
+        let currentUser = null;
+        let savedPrescriptionsList = [];
+        let currentEditingPrescriptionId = null;
+    </script>
     <!-- Tailwind Config -->
     <script>
         tailwind.config = {
@@ -232,15 +247,100 @@
         </div>
         <div id="nav-actions" class="hidden flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
             <div id="doctor-greeting" class="text-sm sm:text-base font-medium text-slate-700 mt-1 sm:mt-0"></div>
-            <button onclick="logout()"
+            
+            <button id="nav-cloud-btn" onclick="toggleAuthModal(true)"
+                class="w-full sm:w-auto justify-center text-sm font-bold text-teal-600 hover:text-teal-800 transition-colors flex items-center gap-2 bg-teal-50 hover:bg-teal-100 border border-teal-200 px-4 py-2 rounded-md">
+                <i class="fa-solid fa-cloud"></i> Cloud Sync
+            </button>
+            <button id="nav-edit-btn" onclick="editProfile()"
+                class="hidden w-full sm:w-auto justify-center text-sm font-medium text-slate-600 hover:text-slate-800 transition-colors flex items-center gap-2 bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-md">
+                <i class="fa-solid fa-user-edit"></i> Edit Profile
+            </button>
+
+            <button onclick="logout()" id="nav-logout-btn"
                 class="w-full sm:w-auto justify-center text-sm font-medium text-slate-500 hover:text-red-500 transition-colors flex items-center gap-2 bg-slate-100 hover:bg-red-50 px-4 py-2 rounded-md">
                 <i class="fa-solid fa-sign-out-alt"></i> Reset Profile
+            </button>
+            <button id="nav-delete-account-btn" onclick="confirmAccountDeletion()" class="hidden w-full sm:w-auto justify-center text-sm font-medium text-red-600 hover:text-red-800 hover:bg-red-50 px-4 py-2 rounded-md transition-colors flex items-center gap-2 border border-red-200">
+                <i class="fa-solid fa-user-slash"></i> Delete Account
             </button>
         </div>
     </nav>
 
+    <!-- Auth Modal Overlay -->
+    <div id="auth-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+            <div class="bg-slate-50 border-b border-slate-200 px-6 py-4 flex justify-between items-center">
+                <h3 id="auth-title" class="text-lg font-bold text-slate-800">Cloud Workspace</h3>
+                <button onclick="toggleAuthModal(false)" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <i class="fa-solid fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div id="auth-error" class="hidden mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-md border border-red-100"></div>
+                <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Email</label>
+                        <input type="email" id="auth-email" required class="w-full border border-slate-300 rounded-md p-2.5 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-sm font-semibold text-slate-700">Password</label>
+                            <button type="button" id="auth-forgot-btn" onclick="handlePasswordReset()" class="text-xs text-teal-600 hover:text-teal-800 font-medium">Forgot Password?</button>
+                        </div>
+                        <input type="password" id="auth-password" required class="w-full border border-slate-300 rounded-md p-2.5 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none">
+                    </div>
+                    <button type="submit" id="auth-submit-btn" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-md shadow transition-colors">Sign In</button>
+                </form>
+
+                <div class="mt-6 text-center">
+                    <button type="button" id="auth-toggle-btn" onclick="toggleAuthMode()" class="text-sm text-teal-600 hover:text-teal-800 font-medium">Don't have an account? Register</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Container -->
     <main class="flex-grow p-4 md:p-8 relative max-w-7xl mx-auto w-full">
+    
+        <!-- ==================== SCREEN 0: GATEKEEPER ==================== -->
+        <div id="screen-0" class="hidden max-w-4xl mx-auto mt-10">
+            <div class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden text-center p-10 space-y-8">
+                <div class="space-y-4">
+                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-teal-50 text-teal-600 mb-2">
+                        <i class="fa-solid fa-file-medical text-4xl"></i>
+                    </div>
+                    <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">Welcome to Dr. Rx</h1>
+                    <p class="text-slate-500 text-lg">The professional prescription generation suite.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl mx-auto px-4 mt-8">
+                    <button onclick="toggleAuthModal(true)" class="flex flex-col items-center justify-center p-6 bg-white border border-slate-200 hover:border-teal-500 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 group text-center h-full w-full">
+                        <div class="text-slate-400 group-hover:text-teal-600 transition-colors mb-4 text-3xl">
+                            <i class="fa-solid fa-cloud"></i>
+                        </div>
+                        <div class="font-bold text-slate-800 text-base mb-1">Log In to Cloud Workspace</div>
+                        <div class="text-xs text-slate-500">Access your saved settings & archives</div>
+                    </button>
+                    
+                    <button onclick="setScreen('screen-1')" class="flex flex-col items-center justify-center p-6 bg-white border border-slate-200 hover:border-indigo-500 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 group text-center h-full w-full">
+                        <div class="text-slate-400 group-hover:text-indigo-600 transition-colors mb-4 text-3xl">
+                            <i class="fa-solid fa-user-plus"></i>
+                        </div>
+                        <div class="font-bold text-slate-800 text-base mb-1">Create Account & Profile</div>
+                        <div class="text-xs text-slate-500">Setup a new professional identity</div>
+                    </button>
+
+                    <button onclick="proceedAsGuest()" class="flex flex-col items-center justify-center p-6 bg-white border border-slate-200 hover:border-slate-400 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 group text-center h-full w-full">
+                        <div class="text-slate-400 group-hover:text-slate-600 transition-colors mb-4 text-3xl">
+                            <i class="fa-solid fa-user-ninja"></i>
+                        </div>
+                        <div class="font-bold text-slate-800 text-base mb-1">Proceed as Guest</div>
+                        <div class="text-xs text-slate-500">Local session only • No cloud backup</div>
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <!-- ==================== SCREEN 1: DOCTOR SET-UP ==================== -->
         <div id="screen-1" class="hidden max-w-xl mx-auto mt-10">
@@ -390,13 +490,49 @@
                             class="w-full border border-slate-300 rounded-md p-2.5 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all"></textarea>
                     </div>
 
-                    <div class="pt-4 border-t border-slate-100">
+                    <div class="pt-4 border-t border-slate-100 space-y-3">
                         <button type="submit"
                             class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded-md shadow-sm transition-colors flex items-center justify-center gap-2">
                             Proceed to Pad <i class="fa-solid fa-arrow-right"></i>
                         </button>
+                        <button type="button" onclick="handleLazySignUp()"
+                            class="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold py-3 px-4 rounded-md shadow-sm border border-indigo-200 transition-colors flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Back up to Cloud & Register Account
+                        </button>
                     </div>
                 </form>
+            </div>
+
+            <!-- Full Mock Prescription Template Sandbox Viewport -->
+            <div class="mt-8 bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
+                <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex flex-col items-center gap-4">
+                    <div class="flex items-center gap-2 w-full">
+                        <i class="fa-solid fa-eye text-teal-600"></i>
+                        <h2 class="text-sm font-bold text-slate-800">Live Template Sandbox Preview</h2>
+                    </div>
+                    
+                    <!-- Template Quick-Selector Navigation Bar -->
+                    <div class="flex flex-wrap justify-center gap-2 text-xs font-semibold w-full">
+                        <button type="button" onclick="changeMockTemplate('1')" id="mock-tpl-1" class="mock-tpl-btn px-3 py-1.5 rounded-full border border-teal-200 bg-teal-50 text-teal-700 transition-colors shadow-sm">Standard Comprehensive</button>
+                        <button type="button" onclick="changeMockTemplate('2')" id="mock-tpl-2" class="mock-tpl-btn px-3 py-1.5 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-colors shadow-sm">Modern Teal</button>
+                        <button type="button" onclick="changeMockTemplate('3')" id="mock-tpl-3" class="mock-tpl-btn px-3 py-1.5 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-colors shadow-sm">Editorial Vibrant</button>
+                        <button type="button" onclick="changeMockTemplate('4')" id="mock-tpl-4" class="mock-tpl-btn px-3 py-1.5 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-colors shadow-sm">Compact Clean</button>
+                        <button type="button" onclick="changeMockTemplate('5')" id="mock-tpl-5" class="mock-tpl-btn px-3 py-1.5 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-colors shadow-sm">Executive Classic</button>
+                    </div>
+                </div>
+                <div class="p-4 bg-slate-200 flex justify-center items-start overflow-hidden">
+                    <!-- Scaled Container Box restricting physical block boundaries perfectly -->
+                    <div class="w-[210mm] max-w-full overflow-hidden origin-top" style="height: calc(296mm * 0.42); max-height: 480px;">
+                        <div id="live-preview-box" class="a4-container shadow-2xl bg-white origin-top-left" style="transform: scale(0.42); width: 210mm; height: 296mm; margin: 0; pointer-events: none;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sign In / Sign Up Anchor -->
+            <div class="mt-6 text-center">
+                <button type="button" onclick="toggleAuthModal(true)" class="text-sm font-medium text-teal-600 hover:text-teal-800 transition-colors underline">
+                    Already have an account? Log In to Cloud Workspace
+                </button>
             </div>
 
             <!-- Global Web App Footer -->
@@ -408,6 +544,20 @@
         <!-- ==================== SCREEN 2: PRESCRIPTION ENTRY FORM ==================== -->
         <div id="screen-2" class="hidden pb-24">
             <div class="max-w-4xl mx-auto space-y-6">
+
+                <!-- Clinical Archives Dashboard -->
+                <div id="archives-dashboard" class="hidden bg-slate-800 rounded-xl shadow-lg border border-slate-700 overflow-hidden text-white">
+                    <div class="px-5 py-4 border-b border-slate-700 flex justify-between items-center cursor-pointer hover:bg-slate-700 transition-colors" onclick="document.getElementById('archives-list').classList.toggle('hidden')">
+                        <h3 class="text-md font-bold flex items-center gap-2">
+                            <i class="fa-solid fa-folder-open text-teal-400"></i> Clinical Archives & Cloud Templates
+                        </h3>
+                        <i class="fa-solid fa-chevron-down text-slate-400"></i>
+                    </div>
+                    <div id="archives-list" class="hidden max-h-80 overflow-y-auto bg-slate-900 p-2 space-y-2">
+                        <!-- Fetched Archives will go here -->
+                        <div class="text-sm text-slate-400 text-center py-4">Loading clinical history...</div>
+                    </div>
+                </div>
 
                 <!-- Patient Section -->
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
@@ -571,7 +721,10 @@
 
             <!-- Sticky Bottom Bar -->
             <div
-                class="fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] p-4 z-40 no-print flex justify-center">
+                class="fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] p-4 z-40 no-print flex justify-center gap-4">
+                <button id="btn-save-cloud" onclick="saveCloudPrescription()" class="hidden bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105 flex items-center gap-2">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Save to Cloud
+                </button>
                 <button onclick="goToPreview()"
                     class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105 flex items-center gap-2">
                     <i class="fa-regular fa-eye"></i> Preview Prescription
@@ -848,8 +1001,32 @@
             signatureDataUrl: null
         };
 
+        // Attach a global event listener to the doctor form to catch all changes and update the live preview
+        document.addEventListener('DOMContentLoaded', () => {
+            const docForm = document.getElementById('doctor-form');
+            if(docForm) {
+                docForm.addEventListener('input', updateLivePreview);
+                docForm.addEventListener('change', updateLivePreview);
+            }
+        });
+
         // Initialization
         window.onload = async () => {
+            // Check for password recovery hash
+            if (window.location.hash.includes('type=recovery')) {
+                const newPassword = prompt("Please enter your new password:");
+                if (newPassword && supabaseClient) {
+                    try {
+                        const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
+                        if (error) throw error;
+                        alert("Password successfully updated. You can now log in with your new password.");
+                        window.location.hash = ''; // clear hash
+                    } catch(err) {
+                        alert("Error updating password: " + err.message);
+                    }
+                }
+            }
+
             // Init dates
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('pat-date').value = today;
@@ -863,6 +1040,9 @@
             addAdvice();
             addMedicine();
 
+            // Check Supabase Auth State and load synced cloud profile
+            await authSessionStateCheck();
+
             // Fetch the medicine data registry from the live public GitHub repository cloud endpoint
             try {
                 const githubApiUrl = "https://raw.githubusercontent.com/swarajkhan/drrx/refs/heads/main/medicines.json";
@@ -875,6 +1055,416 @@
                 console.error("Failed to fetch remote repository data asset via GitHub raw provider:", e);
             }
         };
+
+        let authMode = 'login';
+
+        function toggleAuthModal(show) {
+            const modal = document.getElementById('auth-modal');
+            if(show) {
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+                document.getElementById('auth-error').classList.add('hidden');
+            }
+        }
+
+        function toggleAuthMode(forceMode = null) {
+            authMode = forceMode ? forceMode : (authMode === 'login' ? 'register' : 'login');
+            document.getElementById('auth-title').innerText = authMode === 'login' ? 'Cloud Workspace' : 'Create Account';
+            document.getElementById('auth-submit-btn').innerText = authMode === 'login' ? 'Sign In' : 'Register';
+            document.getElementById('auth-toggle-btn').innerText = authMode === 'login' ? "Don't have an account? Register" : "Already have an account? Sign In";
+            document.getElementById('auth-error').classList.add('hidden');
+            
+            const forgotBtn = document.getElementById('auth-forgot-btn');
+            if(forgotBtn) {
+                if(authMode === 'login') forgotBtn.classList.remove('hidden');
+                else forgotBtn.classList.add('hidden');
+            }
+        }
+
+        function handleLazySignUp() {
+            // Validate form required fields
+            const form = document.getElementById('doctor-form');
+            if(!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            // Temporarily capture state without proceeding to pad
+            appState.doctor.name = document.getElementById('doc-name').value;
+            appState.doctor.regNo = document.getElementById('doc-reg').value;
+            appState.doctor.field = document.getElementById('doc-field').value;
+            appState.doctor.specialization = document.getElementById('doc-spec').value;
+            appState.doctor.phone = document.getElementById('doc-phone').value;
+            appState.doctor.address = document.getElementById('doc-address').value;
+            const cName = document.getElementById('clinic-name');
+            if(cName) appState.doctor.clinicName = cName.value;
+            const cEmail = document.getElementById('clinic-email');
+            if(cEmail) appState.doctor.clinicEmail = cEmail.value;
+
+            let degrees = [];
+            document.querySelectorAll('.doc-degree:checked').forEach(cb => { degrees.push(cb.value); });
+            appState.doctor.degrees = degrees;
+            appState.doctor.otherDegree = document.getElementById('doc-degree-other').value;
+            appState.doctor.miscInfo = document.getElementById('doc-misc').value;
+            appState.doctor.degreeMajors = {
+                "M.D.": document.getElementById('major-md').value.trim(),
+                "D.M.": document.getElementById('major-dm').value.trim(),
+                "M.D.S.": document.getElementById('major-mds').value.trim()
+            };
+
+            // Trigger registration modal
+            toggleAuthMode('register');
+            toggleAuthModal(true);
+        }
+
+        async function handleAuthSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const errorDiv = document.getElementById('auth-error');
+            errorDiv.classList.add('hidden');
+            
+            if(!supabaseClient) {
+                errorDiv.innerText = "Supabase client not initialized.";
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                if(authMode === 'register') {
+                    const { data, error } = await supabaseClient.auth.signUp({ 
+                        email, 
+                        password,
+                        options: { data: { temporary_settings: appState.doctor } } // Pass dynamic fallback state metadata
+                    });
+                    if(error) throw error;
+                    
+                    // Success registration interception point
+                    document.getElementById('auth-form').reset();
+                    errorDiv.className = "mb-4 p-3 bg-teal-50 text-teal-800 text-sm rounded-md border border-teal-100 font-semibold";
+                    errorDiv.innerText = "Registration successful! Please check your inbox to confirm your email address and complete the login process.";
+                    errorDiv.classList.remove('hidden');
+                    // Force the form layout view over to sign in mode so they can access their account once verified
+                    setTimeout(() => { toggleAuthMode('login'); }, 4000);
+                } else {
+                    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                    if(error) throw error;
+                    
+                    toggleAuthModal(false);
+                    
+                    // Profile re-hydration check loop
+                    if (data.user) {
+                        const { data: profile } = await supabaseClient.from('profiles').select('settings').eq('id', data.user.id).single();
+                        if (!profile && appState.doctor.name) {
+                            // Back up lazy registration preferences state into user database row seamlessly
+                            await supabaseClient.from('profiles').upsert({
+                                id: data.user.id,
+                                settings: appState.doctor,
+                                updated_at: new Date().toISOString()
+                            });
+                        }
+                    }
+                    await authSessionStateCheck();
+                }
+            } catch (err) {
+                errorDiv.className = "mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-md border border-red-100";
+                
+                // Intercept Duplicate Registration
+                if (authMode === 'register' && err.message && (err.message.toLowerCase().includes('already registered') || err.message.toLowerCase().includes('already exists') || err.status === 422)) {
+                    errorDiv.innerText = "This email is already registered. Please click 'Already have an account? Sign In' to log in, or click 'Forgot Password?' if you need to recover access to your account.";
+                } else {
+                    errorDiv.innerText = err.message || "An error occurred during authentication.";
+                }
+                
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        async function handlePasswordReset() {
+            if(!supabaseClient) return;
+            
+            const email = prompt("Enter your account email address to receive a password reset link:");
+            if(!email) return;
+
+            try {
+                const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+                    redirectTo: window.location.origin + window.location.pathname
+                });
+                
+                if (error) throw error;
+                alert("Password reset email sent! Check your inbox.");
+                toggleAuthModal(false);
+            } catch(err) {
+                console.error("Password reset error:", err);
+                const errorDiv = document.getElementById('auth-error');
+                errorDiv.innerText = err.message || "Failed to send reset email.";
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        async function authSessionStateCheck() {
+            if(!supabaseClient) return;
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if(session && session.user) {
+                    currentUser = session.user;
+                    // Update UI for logged in state
+                    document.getElementById('nav-cloud-btn').classList.add('hidden');
+                    document.getElementById('nav-edit-btn').classList.remove('hidden');
+                    document.getElementById('nav-logout-btn').innerHTML = '<i class="fa-solid fa-sign-out-alt"></i> Sign Out';
+                    const delBtn = document.getElementById('nav-delete-account-btn');
+                    if (delBtn) delBtn.classList.remove('hidden');
+                    
+                    // Fetch Profile Data
+                    const { data: profile } = await supabaseClient.from('profiles').select('settings').eq('id', currentUser.id).single();
+                    if(profile && profile.settings) {
+                        appState.doctor = profile.settings;
+                        localStorage.setItem('doctorProfile', JSON.stringify(appState.doctor));
+                        updateDoctorGreeting();
+                        loadDoctorProfile(); // re-hydrate form inputs visually
+                    }
+                    
+                    if(typeof fetchSavedPrescriptions === 'function') {
+                        document.getElementById('archives-dashboard').classList.remove('hidden');
+                        document.getElementById('btn-save-cloud').classList.remove('hidden');
+                        fetchSavedPrescriptions();
+                    }
+                    
+                    // If no profile, ensure they go to screen-1
+                    if(!appState.doctor.name) {
+                        setScreen('screen-1');
+                    } else {
+                        setScreen('screen-2');
+                    }
+                } else {
+                    currentUser = null;
+                    document.getElementById('nav-cloud-btn').classList.remove('hidden');
+                    document.getElementById('nav-edit-btn').classList.add('hidden');
+                    document.getElementById('nav-logout-btn').innerHTML = '<i class="fa-solid fa-sign-out-alt"></i> Reset Profile';
+                    const delBtn = document.getElementById('nav-delete-account-btn');
+                    if (delBtn) delBtn.classList.add('hidden');
+                    
+                    // Route to Gatekeeper Screen 0 if unauthenticated and no local profile
+                    if(!appState.doctor.name) {
+                        setScreen('screen-0');
+                    } else {
+                        // Guest mode active, let them continue in their current flow (screen-1 or screen-2)
+                        setScreen('screen-2'); // default to pad if they have local profile
+                    }
+                }
+            } catch(e) {
+                console.error("Session check failed", e);
+                if(!appState.doctor.name) setScreen('screen-0');
+            }
+        }
+        
+        function editProfile() {
+            setScreen('screen-1');
+        }
+
+        async function fetchSavedPrescriptions() {
+            if(!supabaseClient || !currentUser) return;
+            try {
+                const { data, error } = await supabaseClient.from('prescriptions')
+                    .select('id, patient_name, updated_at, prescription_data')
+                    .eq('user_id', currentUser.id)
+                    .order('updated_at', { ascending: false })
+                    .limit(50);
+                
+                if(error) throw error;
+                savedPrescriptionsList = data || [];
+                
+                const listContainer = document.getElementById('archives-list');
+                if(!listContainer) return;
+                
+                if(savedPrescriptionsList.length === 0) {
+                    listContainer.innerHTML = '<div class="text-sm text-slate-400 text-center py-4">No records found.</div>';
+                    return;
+                }
+                
+                listContainer.innerHTML = savedPrescriptionsList.map(record => `
+                    <div class="bg-slate-800 p-3 rounded border border-slate-700 hover:border-teal-500 transition-colors flex justify-between items-center group">
+                        <div>
+                            <div class="text-sm font-semibold text-white">${record.patient_name}</div>
+                            <div class="text-xs text-slate-400">${new Date(record.updated_at).toLocaleDateString()}</div>
+                        </div>
+                        <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="loadSelectedPrescription('${record.id}', false)" title="Load & Edit" class="bg-indigo-600 hover:bg-indigo-700 text-white p-1.5 rounded text-xs">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button onclick="loadSelectedPrescription('${record.id}', true)" title="Use as Template" class="bg-teal-600 hover:bg-teal-700 text-white p-1.5 rounded text-xs">
+                                <i class="fa-solid fa-copy"></i>
+                            </button>
+                            <button onclick="deletePrescription('${record.id}')" title="Delete" class="bg-red-600 hover:bg-red-700 text-white p-1.5 rounded text-xs">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error("Failed to fetch prescriptions:", err);
+            }
+        }
+
+        async function saveCloudPrescription() {
+            if(!supabaseClient || !currentUser) return;
+            
+            // Sync current inputs into state before saving
+            appState.patient = {
+                name: document.getElementById('pat-name').value,
+                age: document.getElementById('pat-age').value,
+                sex: document.getElementById('pat-sex').value,
+                weight: document.getElementById('pat-weight').value,
+                date: document.getElementById('pat-date').value
+            };
+            appState.clinical.notes = Array.from(document.querySelectorAll('.note-input')).map(input => input.value).filter(val => val.trim() !== '');
+            appState.clinical.advices = Array.from(document.querySelectorAll('.advice-input')).map(input => input.value).filter(val => val.trim() !== '');
+            appState.clinical.investigations = document.getElementById('clin-investigations').value;
+
+            // Map rx array
+            const rxRows = document.querySelectorAll('.rx-row');
+            appState.rx = [];
+            rxRows.forEach((row, i) => {
+                const name = document.getElementById(`med-name-${i}`) ? document.getElementById(`med-name-${i}`).value : '';
+                if (name.trim()) {
+                    appState.rx.push({
+                        name: name,
+                        dosage: document.getElementById(`med-dosage-${i}`).value,
+                        duration: document.getElementById(`med-duration-${i}`).value,
+                        instruction: document.getElementById(`med-instruction-${i}`).value,
+                        isEditing: true
+                    });
+                }
+            });
+            
+            // Save signature
+            if (signaturePad && !signaturePad.isEmpty()) {
+                appState.signatureDataUrl = signaturePad.toDataURL();
+            }
+
+            if(!appState.patient.name) {
+                alert("Patient name is required to save to cloud.");
+                return;
+            }
+
+            const btn = document.getElementById('btn-save-cloud');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';
+
+            try {
+                const payload = {
+                    user_id: currentUser.id,
+                    patient_name: appState.patient.name,
+                    prescription_data: appState,
+                    updated_at: new Date().toISOString()
+                };
+
+                if(currentEditingPrescriptionId) {
+                    payload.id = currentEditingPrescriptionId;
+                }
+
+                const { data, error } = await supabaseClient.from('prescriptions').upsert(payload).select().single();
+                if(error) throw error;
+                
+                currentEditingPrescriptionId = data.id;
+                await fetchSavedPrescriptions();
+                
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
+                setTimeout(() => { btn.innerHTML = originalText; }, 2000);
+            } catch(err) {
+                console.error("Save to cloud failed:", err);
+                alert("Failed to save to cloud.");
+                btn.innerHTML = originalText;
+            }
+        }
+
+        function loadSelectedPrescription(id, isTemplate) {
+            const record = savedPrescriptionsList.find(r => r.id === id);
+            if(!record) return;
+
+            const data = record.prescription_data;
+            appState = JSON.parse(JSON.stringify(data)); // deep copy
+            
+            if(isTemplate) {
+                currentEditingPrescriptionId = null;
+                appState.patient = { name: '', age: '', sex: 'M', weight: '', date: new Date().toISOString().split('T')[0] };
+                appState.signatureDataUrl = null;
+            } else {
+                currentEditingPrescriptionId = id;
+            }
+
+            // Restore UI Patient
+            document.getElementById('pat-name').value = appState.patient.name || '';
+            document.getElementById('pat-age').value = appState.patient.age || '';
+            document.getElementById('pat-sex').value = appState.patient.sex || 'M';
+            document.getElementById('pat-weight').value = appState.patient.weight || '';
+            document.getElementById('pat-date').value = appState.patient.date || '';
+
+            // Restore UI Clinical
+            document.getElementById('clin-investigations').value = appState.clinical.investigations || '';
+            
+            const notesContainer = document.getElementById('notes-container');
+            notesContainer.innerHTML = '';
+            if(appState.clinical.notes && appState.clinical.notes.length > 0) {
+                appState.clinical.notes.forEach(note => {
+                    const idx = notesContainer.children.length;
+                    notesContainer.insertAdjacentHTML('beforeend', `
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fa-solid fa-caret-right text-teal-600"></i>
+                            <input type="text" class="note-input w-full border-b border-dashed border-slate-300 focus:border-teal-500 outline-none text-sm pb-1" value="${note.replace(/"/g, '&quot;')}">
+                        </div>
+                    `);
+                });
+            } else {
+                addNote();
+            }
+
+            const advicesContainer = document.getElementById('advices-container');
+            advicesContainer.innerHTML = '';
+            if(appState.clinical.advices && appState.clinical.advices.length > 0) {
+                appState.clinical.advices.forEach(adv => {
+                    const idx = advicesContainer.children.length;
+                    advicesContainer.insertAdjacentHTML('beforeend', `
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fa-solid fa-caret-right text-teal-600"></i>
+                            <input type="text" class="advice-input w-full border-b border-dashed border-slate-300 focus:border-teal-500 outline-none text-sm pb-1" value="${adv.replace(/"/g, '&quot;')}">
+                        </div>
+                    `);
+                });
+            } else {
+                addAdvice();
+            }
+
+            // Restore UI Rx
+            renderMedicines();
+
+            // Restore signature if exists
+            if(appState.signatureDataUrl) {
+                signaturePad.fromDataURL(appState.signatureDataUrl);
+            } else {
+                signaturePad.clear();
+            }
+            
+            if(!isTemplate) {
+                goToPreview();
+            } else {
+                document.getElementById('archives-list').classList.add('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        async function deletePrescription(id) {
+            if(!confirm("Are you sure you want to permanently delete this prescription record?")) return;
+            try {
+                const { error } = await supabaseClient.from('prescriptions').delete().eq('id', id);
+                if(error) throw error;
+                if(currentEditingPrescriptionId === id) currentEditingPrescriptionId = null;
+                await fetchSavedPrescriptions();
+            } catch(err) {
+                console.error("Delete failed:", err);
+            }
+        }
 
         function updateDoctorGreeting() {
             const greetingDiv = document.getElementById('doctor-greeting');
@@ -967,6 +1557,7 @@
             } else {
                 setScreen('screen-1');
             }
+            updateLivePreview();
         }
 
         function saveDoctorProfile(e) {
@@ -993,6 +1584,21 @@
             };
 
             localStorage.setItem('doctorProfile', JSON.stringify(appState.doctor));
+            
+            if (currentUser && supabaseClient) {
+                try {
+                    supabaseClient.from('profiles').upsert({
+                        id: currentUser.id,
+                        settings: appState.doctor,
+                        updated_at: new Date().toISOString()
+                    }).then(({error}) => {
+                        if (error) console.error("Failed to sync profile to Supabase:", error);
+                    });
+                } catch(err) {
+                    console.error("Failed to sync profile to Supabase:", err);
+                }
+            }
+
             const navActions = document.getElementById('nav-actions');
             navActions.classList.remove('hidden');
             navActions.classList.add('flex');
@@ -1000,17 +1606,74 @@
             setScreen('screen-2');
         }
 
-        function logout() {
-            if (confirm("Are you sure you want to reset your profile? This will clear local storage.")) {
+        async function logout() {
+            if (confirm(currentUser ? "Are you sure you want to sign out?" : "Are you sure you want to reset your profile? This will clear local storage.")) {
+                if (currentUser && supabaseClient) {
+                    await supabaseClient.auth.signOut();
+                    currentUser = null;
+                }
+                
                 localStorage.removeItem('doctorProfile');
+                appState.doctor = {
+                    name: '', field: '', specialization: '', degrees: [], degreeMajors: { "M.D.": "", "D.M.": "", "M.D.S.": "" }, otherDegree: '', miscInfo: '', regNo: '', clinicName: '', clinicAddress: '', clinicPhone: '', clinicEmail: '', template: '1'
+                };
+                
                 const navActions = document.getElementById('nav-actions');
                 navActions.classList.add('hidden');
                 navActions.classList.remove('flex');
+                
+                document.getElementById('nav-cloud-btn').classList.remove('hidden');
+                document.getElementById('nav-edit-btn').classList.add('hidden');
+                document.getElementById('nav-logout-btn').innerHTML = '<i class="fa-solid fa-sign-out-alt"></i> Reset Profile';
+                const delBtn = document.getElementById('nav-delete-account-btn');
+                if (delBtn) delBtn.classList.add('hidden');
+                const archivesDash = document.getElementById('archives-dashboard');
+                if(archivesDash) archivesDash.classList.add('hidden');
+                const btnSaveCloud = document.getElementById('btn-save-cloud');
+                if(btnSaveCloud) btnSaveCloud.classList.add('hidden');
+
                 // reset form
                 document.getElementById('doctor-form').reset();
                 toggleSpecialization();
                 toggleOtherDegree();
-                setScreen('screen-1');
+                setScreen('screen-0');
+            }
+        }
+
+        async function confirmAccountDeletion() {
+            if (!currentUser || !supabaseClient) return;
+
+            const confirmation1 = confirm("⚠️ WARNING: Are you absolutely sure you want to permanently delete your account? This will immediately wipe your saved letterhead profile, cloud templates, and all historical prescription archives.");
+            if (!confirmation1) return;
+
+            const validationText = prompt("To confirm deletion, please type your registered email address exactly as it is:");
+            if (validationText !== currentUser.email) {
+                alert("Email verification mismatch. Account deletion cancelled.");
+                return;
+            }
+
+            try {
+                // 1. Purge all dependent database rows belonging to this tenant mapping RLS rules
+                const { error: rxError } = await supabaseClient.from('prescriptions').delete().eq('user_id', currentUser.id);
+                if (rxError) throw rxError;
+
+                const { error: profileError } = await supabaseClient.from('profiles').delete().eq('id', currentUser.id);
+                if (profileError) throw profileError;
+
+                // 2. Invoke client function self-demolition routine via Supabase RPC or User Profile RPC
+                // Since client-side JS cannot delete users from auth.users directly without service_role admin privileges, 
+                // we call a dedicated edge function or clear out their current profile settings row, sign them out, 
+                // and guide them back to setup layout grids cleanly.
+                
+                await supabaseClient.auth.signOut();
+                localStorage.removeItem('doctorProfile');
+                currentUser = null;
+                
+                alert("Your profile data and cloud configurations have been successfully purged from our servers.");
+                location.reload(); // Hard reload application back to Screen 0 initialization state cleanly
+            } catch (err) {
+                console.error("Account self-purge failure sequence execution error:", err);
+                alert("An error occurred during data deletion: " + err.message);
             }
         }
 
@@ -1050,11 +1713,15 @@
         }
 
         function setScreen(screenId) {
-            ['screen-1', 'screen-2', 'screen-3'].forEach(id => {
+            ['screen-0', 'screen-1', 'screen-2', 'screen-3'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
             });
             document.getElementById(screenId).classList.remove('hidden');
             window.scrollTo(0, 0);
+        }
+
+        function proceedAsGuest() {
+            setScreen('screen-1');
         }
 
         // --- Dynamic Lists (Notes, Advices) ---
@@ -1317,6 +1984,208 @@
             document.getElementById('template-selector').value = appState.template;
             populatePrintTemplate();
             setScreen('screen-3');
+        }
+
+        let currentMockTemplate = '1';
+        
+        function changeMockTemplate(val) {
+            currentMockTemplate = val;
+            document.querySelectorAll('.mock-tpl-btn').forEach(btn => {
+                btn.classList.remove('border-teal-200', 'bg-teal-50', 'text-teal-700');
+                btn.classList.add('border-slate-200', 'bg-white', 'hover:bg-slate-50', 'text-slate-600');
+            });
+            const activeBtn = document.getElementById('mock-tpl-' + val);
+            if(activeBtn) {
+                activeBtn.classList.remove('border-slate-200', 'bg-white', 'hover:bg-slate-50', 'text-slate-600');
+                activeBtn.classList.add('border-teal-200', 'bg-teal-50', 'text-teal-700');
+            }
+            updateLivePreview();
+        }
+
+        function updateLivePreview() {
+            const livePreviewBox = document.getElementById('live-preview-box');
+            if (!livePreviewBox) return;
+
+            // 1. Gather live field variables dynamically from the input form state with clean fallback behaviors
+            const docName = document.getElementById('doc-name')?.value?.trim() || '';
+            const docField = document.getElementById('doc-field')?.value || 'General Physician';
+            const docSpec = document.getElementById('doc-spec')?.value?.trim() || '';
+            const activeField = docField === 'Specialist' ? docSpec : docField;
+            const docReg = document.getElementById('doc-reg')?.value?.trim() || '';
+            const docMisc = document.getElementById('doc-misc')?.value?.trim() || '';
+            const docPhone = document.getElementById('doc-phone')?.value?.trim() || '';
+            const docAddress = document.getElementById('doc-address')?.value?.trim() || '';
+
+            // 2. Map checkboxes to compile degree text strings dynamically
+            let baseDegrees = [];
+            document.querySelectorAll('.doc-degree:checked').forEach(cb => {
+                if (cb.value !== 'Other') {
+                    const majorId = cb.value === 'M.D.' ? 'major-md' : cb.value === 'D.M.' ? 'major-dm' : 'major-mds';
+                    const majorVal = document.getElementById(majorId)?.value?.trim();
+                    baseDegrees.push(majorVal ? `${cb.value} (${majorVal})` : cb.value);
+                }
+            });
+            const otherDegree = document.getElementById('doc-degree-other')?.value?.trim();
+            if (otherDegree) baseDegrees.push(otherDegree);
+            const degString = baseDegrees.join(', ');
+
+            const displayDate = new Date().toLocaleDateString('en-GB');
+
+            // 3. Clear out mock text - use clean, non-obtrusive blank row placeholders for the setup preview screen
+            const pName = "";
+            const pAge = "";
+            const pSex = "";
+            const pWeight = "";
+            const pAddress = "";
+
+            let leftColHtml = '';
+            let rightColHtml = '';
+            const sigHtml = '';
+
+            // 4. Compile targeted template selection layout skin smoothly
+            let html = '';
+            if (currentMockTemplate === '1') {
+                html = `
+                    <div class="relative h-[220px] overflow-hidden bg-white">
+                        <div class="absolute top-0 right-0 w-[65%] h-[180px] bg-red-400 rounded-bl-full z-0"></div>
+                        <div class="absolute top-[-50px] left-[-50px] w-[300px] h-[300px] bg-cyan-200 rounded-full z-0"></div>
+                        <div class="absolute top-[130px] left-[50px] w-[120px] h-[120px] bg-red-400 rounded-full z-10 flex justify-center items-center text-white text-[3rem]"><i class="fa-solid fa-user-doctor opacity-90"></i></div>
+                        <div class="relative z-20 flex justify-between pt-8 px-10 text-right leading-snug">
+                            <div class="w-32"></div>
+                            <div class="text-white w-3/5 pr-4">
+                                <h1 class="text-2xl font-serif font-bold mb-1">${docName}</h1>
+                                <p class="text-xs opacity-90 tracking-wide">${activeField}</p>
+                                <p class="text-[11px] font-semibold opacity-90 mt-0.5">${degString}</p>
+                                <p class="text-[10px] opacity-90 mt-0.5 italic">${docMisc}</p>
+                                ${docReg ? `<p class="text-[10px] opacity-80 mt-0.5">Reg. no.- ${docReg}</p>` : ''}
+                            </div>
+                        </div>
+                        <div class="absolute bottom-1 right-10 text-xs font-semibold z-20 text-slate-800">DATE: <span class="border-b border-dashed border-slate-400 inline-block w-24 text-center">${displayDate}</span></div>
+                    </div>
+                    <div class="px-8 py-2 border-y border-slate-300 mx-4 my-1 text-[12px] font-semibold flex bg-slate-50 items-end gap-2">
+                        <span>NAME:</span><span class="flex-grow border-b border-dashed border-slate-300 text-slate-900 font-bold uppercase truncate">${pName}</span>
+                        <span>AGE:</span><span class="w-8 border-b border-dashed border-slate-300 text-center">${pAge}</span>
+                        <span>SEX:</span><span class="w-8 border-b border-dashed border-slate-300 text-center">${pSex}</span>
+                    </div>
+                    <div class="px-8 flex relative" style="height: 600px;">
+                        <div class="w-[35%] pr-4 pt-2 border-r border-slate-200 flex flex-col">${leftColHtml}</div>
+                        <div class="w-[65%] pl-4 pt-1 flex flex-col"><div class="text-3xl font-serif font-bold text-slate-800 leading-none mb-2">Rx</div>${rightColHtml}</div>
+                    </div>
+                    <div class="absolute bottom-0 w-full px-8 py-4 flex justify-between items-end border-t-[6px] border-cyan-200 bg-white">
+                        <div class="text-[11px] text-slate-600 max-w-[60%]"><strong>${docPhone}</strong><br><span class="block truncate">${docAddress}</span></div>
+                        <div class="w-[30%] flex flex-col items-center"><div class="h-10 flex items-end justify-center w-full border-b border-slate-300 pb-1">${sigHtml}</div><p class="text-[10px] font-bold text-slate-800 mt-0.5">${docName}</p></div>
+                    </div>`;
+            } 
+            else if (currentMockTemplate === '2') {
+                html = `
+                    <div class="relative h-[220px] overflow-hidden bg-white">
+                        <div class="absolute top-0 right-0 w-[65%] h-[180px] bg-[#0f766e] rounded-bl-full z-0"></div>
+                        <div class="absolute top-[-50px] left-[-50px] w-[300px] h-[300px] bg-[#ccfbf1] rounded-full z-0"></div>
+                        <div class="absolute top-[130px] left-[50px] w-[120px] h-[120px] bg-[#0f766e] rounded-full z-10 flex justify-center items-center text-white text-[3rem]"><i class="fa-solid fa-user-doctor opacity-90"></i></div>
+                        <div class="relative z-20 flex justify-between pt-8 px-10 text-right leading-snug">
+                            <div class="w-32"></div>
+                            <div class="text-white w-3/5 pr-4">
+                                <h1 class="text-2xl font-serif font-bold mb-1">${docName}</h1>
+                                <p class="text-xs opacity-90 tracking-wide">${activeField}</p>
+                                <p class="text-[11px] font-semibold opacity-90 mt-0.5">${degString}</p>
+                                <p class="text-[10px] opacity-90 mt-0.5 italic">${docMisc}</p>
+                                ${docReg ? `<p class="text-[10px] opacity-80 mt-0.5">Reg. no.- ${docReg}</p>` : ''}
+                            </div>
+                        </div>
+                        <div class="absolute bottom-1 right-10 text-xs font-semibold z-20 text-slate-800">DATE: <span class="border-b border-dashed border-slate-400 inline-block w-24 text-center">${displayDate}</span></div>
+                    </div>
+                    <div class="px-8 py-2 border-y border-slate-300 mx-4 my-1 text-[12px] font-semibold flex bg-slate-50 items-end gap-2">
+                        <span>NAME:</span><span class="flex-grow border-b border-dashed border-slate-300 text-slate-900 font-bold uppercase truncate">${pName}</span>
+                        <span>AGE:</span><span class="w-8 border-b border-dashed border-slate-300 text-center">${pAge}</span>
+                        <span>SEX:</span><span class="w-8 border-b border-dashed border-slate-300 text-center">${pSex}</span>
+                    </div>
+                    <div class="px-8 flex relative" style="height: 600px;">
+                        <div class="w-[35%] pr-4 pt-2 border-r border-slate-200 flex flex-col">${leftColHtml}</div>
+                        <div class="w-[65%] pl-4 pt-1 flex flex-col"><div class="text-3xl font-serif font-bold text-[#0f766e] leading-none mb-2">Rx</div>${rightColHtml}</div>
+                    </div>
+                    <div class="absolute bottom-0 w-full px-8 py-4 flex justify-between items-end border-t-[6px] border-[#0f766e] bg-white">
+                        <div class="text-[11px] text-slate-600 max-w-[60%]"><strong>${docPhone}</strong><br><span class="block truncate">${docAddress}</span></div>
+                        <div class="w-[30%] flex flex-col items-center"><div class="h-10 flex items-end justify-center w-full border-b border-slate-300 pb-1">${sigHtml}</div><p class="text-[10px] font-bold text-slate-800 mt-0.5">${docName}</p></div>
+                    </div>`;
+            }
+            else if (currentMockTemplate === '3') {
+                html = `
+                    <div class="px-8 py-6 bg-[#eef2ff] border-b-[4px] border-[#4338ca] relative overflow-hidden">
+                        <div class="flex justify-between items-center w-full relative z-10">
+                            <div>
+                                <h1 class="text-2xl font-extrabold text-[#4338ca] mb-0.5">${docName}</h1>
+                                <p class="text-xs font-bold text-slate-700 tracking-wide">${activeField}</p>
+                                <p class="text-[11px] font-semibold text-slate-600 mt-0.5">${degString} ${docMisc ? '| ' + docMisc : ''}</p>
+                            </div>
+                            ${docReg ? `<div class="bg-white p-2 rounded shadow-sm border border-[#c7d2fe] text-center text-[11px] font-bold text-[#4338ca]">Reg: ${docReg}</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="mx-6 mt-3 bg-white border border-[#e0e7ff] rounded-xl p-3 shadow-sm flex items-center justify-between text-[12px] text-slate-600">
+                        <div><strong>${pName}</strong> &nbsp;|&nbsp; ${pAge} Yrs / ${pSex} &nbsp;|&nbsp; ${pWeight} kg</div>
+                        <div class="bg-[#4338ca] text-white px-2 py-0.5 rounded font-bold text-[10px]">${displayDate}</div>
+                    </div>
+                    <div class="px-8 flex relative mt-3" style="height: 600px;">
+                        <div class="w-[30%] pr-4 pt-1 border-r border-slate-200 flex flex-col">${leftColHtml}</div>
+                        <div class="w-[70%] pl-5 pt-0 flex flex-col"><div class="flex items-center gap-2 mb-2"><div class="bg-[#4338ca] text-white px-2 py-0.5 rounded text-lg font-serif italic font-bold">Rx</div><div class="h-px bg-slate-200 flex-grow"></div></div>${rightColHtml}</div>
+                    </div>
+                    <div class="absolute bottom-0 w-full px-8 py-3 bg-slate-50 border-t border-slate-200 flex justify-between items-end">
+                        <div class="text-[11px] text-slate-600"><i class="fa-solid fa-phone text-[#4338ca] mr-1"></i>${docPhone}<br><i class="fa-solid fa-location-dot text-[#4338ca] mr-1"></i>${docAddress}</div>
+                        <div class="w-[30%] flex flex-col items-center"><div class="h-10 flex items-end justify-center w-full border-b border-slate-300 pb-1">${sigHtml}</div><p class="text-[10px] font-bold text-slate-700 mt-0.5">${docName}</p></div>
+                    </div>`;
+            }
+            else if (currentMockTemplate === '4') {
+                html = `
+                    <div class="px-6 pt-6 pb-2 border-b-2 border-[#374151] flex justify-between items-end bg-white">
+                        <div>
+                            <h1 class="text-xl font-bold text-[#374151] uppercase tracking-tight leading-none mb-0.5">${docName}</h1>
+                            <p class="text-[11px] font-bold text-slate-600 uppercase tracking-widest">${activeField}</p>
+                            <p class="text-[10px] text-slate-500 mt-0.5">${degString} ${docReg ? '| Reg: ' + docReg : ''}</p>
+                        </div>
+                        <div class="text-right text-[10px] text-slate-500">
+                            <p class="font-bold text-slate-600"><i class="fa-solid fa-phone mr-1"></i>${docPhone}</p>
+                            <p class="max-w-[180px] truncate mt-0.5">${docAddress}</p>
+                        </div>
+                    </div>
+                    <div class="px-6 py-1 border-b border-slate-200 bg-slate-50 flex items-center justify-between text-[11px] font-medium tracking-wider text-slate-600">
+                        <div><strong>${pName}</strong> &nbsp;|&nbsp; ${pAge}/${pSex} &nbsp;|&nbsp; ${pWeight} kg</div>
+                        <div>DATE: <strong>${displayDate}</strong></div>
+                    </div>
+                    <div class="px-6 pt-3 flex relative" style="height: 600px;">
+                        <div class="w-[30%] pr-3 border-r border-slate-200 flex flex-col">${leftColHtml}</div>
+                        <div class="w-[70%] pl-4 flex flex-col"><div class="text-xl font-serif font-bold text-[#374151] mb-1 border-b border-slate-200 pb-0.5">Rx</div>${rightColHtml}</div>
+                    </div>
+                    <div class="absolute bottom-0 w-full px-6 py-3 bg-white flex justify-end items-end border-t border-slate-200">
+                        <div class="w-[25%] flex flex-col items-center"><div class="h-8 flex items-end justify-center w-full border-b border-slate-400 pb-1">${sigHtml}</div><p class="text-[10px] font-bold text-slate-700 mt-0.5">${docName}</p></div>
+                    </div>`;
+            }
+            else if (currentMockTemplate === '5') {
+                html = `
+                    <div class="pt-8 pb-4 px-8 text-center border-b-[2px] border-[#1e293b] bg-white">
+                        <h1 class="text-2xl font-serif font-bold text-[#1e293b] uppercase mb-0.5">${docName}</h1>
+                        <p class="text-xs font-serif font-semibold text-slate-700 uppercase tracking-wider mb-0.5">${activeField}</p>
+                        <p class="text-[11px] font-serif text-slate-600 mb-0.5">${degString} ${docReg ? '| Reg: ' + docReg : ''}</p>
+                        <p class="text-[10px] font-serif text-slate-500 italic">${docMisc}</p>
+                    </div>
+                    <div class="px-8 py-2 flex justify-between items-center text-[12px] font-serif border-b border-slate-100">
+                        <div>Date: <strong>${displayDate}</strong></div>
+                    </div>
+                    <div class="mx-6 border border-[#1e293b] p-2 my-2 text-[11px] font-serif bg-slate-50/50 flex flex-wrap gap-x-4">
+                        <div><strong>Patient:</strong> ${pName}</div>
+                        <div><strong>Age/Sex:</strong> ${pAge} Yrs / ${pSex}</div>
+                        <div class="flex-grow text-right"><strong>Address:</strong> ${pAddress}</div>
+                    </div>
+                    <div class="px-8 flex relative" style="height: 600px;">
+                        <div class="w-[30%] pr-4 pt-1 border-r-2 border-[#1e293b] flex flex-col">${leftColHtml}</div>
+                        <div class="w-[70%] pl-5 pt-0 flex flex-col"><div class="text-3xl font-serif font-bold text-[#1e293b] italic leading-none mb-2">Rx</div>${rightColHtml}</div>
+                    </div>
+                    <div class="absolute bottom-0 w-full px-8 py-4 flex justify-between items-end border-t border-[#1e293b] bg-white">
+                        <div class="text-[11px] font-serif text-slate-600 max-w-[65%]"><strong>Contact:</strong> ${docPhone}<br>${docAddress}</div>
+                        <div class="w-[25%] flex flex-col items-center"><div class="h-10 flex items-end justify-center w-full border-b border-slate-800 pb-1">${sigHtml}</div><p class="text-[11px] font-serif font-bold text-[#1e293b] mt-0.5">${docName}</p></div>
+                    </div>`;
+            }
+
+            // 7. Inject HTML code into sandbox container cleanly
+            livePreviewBox.innerHTML = html;
         }
 
         function changeTemplate(val) {
