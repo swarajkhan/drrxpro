@@ -1679,6 +1679,7 @@
                         isSuperAdmin = true;
                         superAdminCreds = creds;
                         document.getElementById('nav-super-admin-btn').classList.remove('hidden');
+                        document.getElementById('nav-edit-btn').classList.remove('hidden');
                         document.getElementById('nav-cloud-btn').classList.add('hidden');
                         const backupBtn = document.getElementById('btn-backup-cloud');
                         if (backupBtn) backupBtn.classList.add('hidden');
@@ -2169,10 +2170,18 @@
         }
 
         async function logout() {
-            if (confirm(currentUser ? "Are you sure you want to sign out?" : "Are you sure you want to reset your profile? This will clear local storage.")) {
+            const msg = (currentUser || isSuperAdmin) ? "Are you sure you want to sign out?" : "Are you sure you want to reset your profile? This will clear local storage.";
+            if (confirm(msg)) {
                 if (currentUser && supabaseClient) {
                     await supabaseClient.auth.signOut();
                     currentUser = null;
+                }
+                
+                if (isSuperAdmin) {
+                    isSuperAdmin = false;
+                    superAdminCreds = { email: '', password: '' };
+                    localStorage.removeItem('superAdminCreds');
+                    document.getElementById('nav-super-admin-btn').classList.add('hidden');
                 }
 
                 localStorage.removeItem('doctorProfile');
