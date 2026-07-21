@@ -316,10 +316,28 @@
                         <input type="password" id="auth-password" required
                             class="w-full border border-slate-300 rounded-md p-2.5 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none">
                     </div>
+                    <div id="auth-coupon-container" class="hidden">
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Registration Coupon Code <span class="text-red-500">*</span></label>
+                        <input type="text" id="auth-coupon" 
+                            class="w-full border border-slate-300 rounded-md p-2.5 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none font-mono uppercase"
+                            placeholder="PRO-XXXXXX">
+                    </div>
                     <button type="submit" id="auth-submit-btn"
                         class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-md shadow transition-colors">Sign
                         In</button>
                 </form>
+                
+                <div id="oauth-divider" class="my-4 flex items-center justify-between">
+                    <span class="w-1/5 border-b border-slate-200 lg:w-1/4"></span>
+                    <span class="text-xs text-center text-slate-500 uppercase font-semibold">Or continue with</span>
+                    <span class="w-1/5 border-b border-slate-200 lg:w-1/4"></span>
+                </div>
+                
+                <button type="button" onclick="signInWithGoogle()" id="btn-oauth-google"
+                    class="w-full flex justify-center items-center gap-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold py-2.5 rounded-md shadow-sm transition-colors">
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="w-5 h-5">
+                    Google
+                </button>
 
                 <div class="mt-6 text-center">
                     <button type="button" id="auth-toggle-btn" onclick="toggleAuthMode()"
@@ -1644,6 +1662,59 @@
             }
         }
 
+        async function signInWithGoogle() {
+            if (!supabaseClient) return;
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: window.location.origin + window.location.pathname
+                    }
+                });
+                if (error) throw error;
+            } catch (err) {
+                alert("Error initializing Google Sign-In: " + err.message);
+            }
+        }
+        
+        async function cancelOauthInterceptor() {
+            if (supabaseClient) await supabaseClient.auth.signOut();
+            document.getElementById('oauth-interceptor').classList.add('hidden');
+            document.getElementById('auth-modal-content').classList.remove('hidden');
+            location.reload();
+        }
+
+        async function submitOauthCoupon() {
+            if (!supabaseClient || !currentUser) return;
+            const code = document.getElementById('interceptor-coupon').value.trim();
+            const errDiv = document.getElementById('interceptor-error');
+            
+            if (!code) {
+                errDiv.innerText = "Please enter a valid coupon code.";
+                errDiv.classList.remove('hidden');
+                return;
+            }
+            
+            try {
+                // Consume the coupon
+                const { data, error } = await supabaseClient.rpc('consume_coupon', { p_code: code, p_email: currentUser.email });
+                if (error) throw error;
+                
+                if (data === false) {
+                    throw new Error("Invalid or already used coupon code.");
+                }
+                
+                // If success, re-run auth session check to proceed into app
+                errDiv.classList.add('hidden');
+                document.getElementById('oauth-interceptor').classList.add('hidden');
+                await authSessionStateCheck();
+                
+            } catch (err) {
+                errDiv.innerText = err.message || "Failed to validate coupon.";
+                errDiv.classList.remove('hidden');
+            }
+        }
+
         async function handlePasswordReset() {
             if (!supabaseClient) return;
 
@@ -1703,6 +1774,26 @@
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 if (session && session.user) {
                     currentUser = session.user;
+                    
+                    // OAuth Coupon Interception Check
+                    // We check if the user has a valid coupon using the RPC
+                    try {
+                        const { data: hasCoupon, error: couponErr } = await supabaseClient.rpc('check_user_has_coupon', { p_email: currentUser.email });
+                        if (couponErr) throw couponErr;
+                        
+                        if (!hasCoupon && currentUser.id) {
+                            // User is signed in but has not provided a coupon!
+                            // Show interceptor UI
+                            document.getElementById('auth-modal').classList.remove('hidden');
+                            document.getElementById('auth-modal-content').classList.add('hidden');
+                            document.getElementById('oauth-interceptor').classList.remove('hidden');
+                            return; // Halt normal login flow
+                        }
+                    } catch (err) {
+                        console.error("Error checking coupon status:", err);
+                        return; // Halt on error
+                    }
+                    
                     // Update UI for logged in state
                     document.getElementById('nav-cloud-btn').classList.add('hidden');
                     document.getElementById('btn-backup-cloud')?.classList.add('hidden');
