@@ -1737,6 +1737,7 @@
                 // If success, re-run auth session check to proceed into app
                 errDiv.classList.add('hidden');
                 document.getElementById('oauth-interceptor').classList.add('hidden');
+                toggleAuthModal(false);
                 await authSessionStateCheck();
                 
             } catch (err) {
@@ -3224,16 +3225,19 @@
 
             // 1. Gather all dynamic header variables cleanly
             const docName = appState.doctor.name || '';
-            const docField = appState.doctor.field === 'Specialist' ? appState.doctor.specialization : appState.doctor.field;
-            let baseDegrees = appState.doctor.degrees.filter(deg => deg !== 'Other');
+            const docField = appState.doctor.field === 'Specialist' ? appState.doctor.specialization : (appState.doctor.field || appState.doctor.title || '');
+            let safeDegrees = appState.doctor.degrees || [];
+            let baseDegrees = safeDegrees.filter(deg => deg !== 'Other');
             let formattedDegrees = baseDegrees.map(deg => {
                 let major = appState.doctor.degreeMajors && appState.doctor.degreeMajors[deg];
                 return major && major.trim() !== '' ? `${deg} (${major.trim()})` : deg;
             });
             let degString = formattedDegrees.join(', ');
             if (appState.doctor.otherDegree) degString += (degString ? ', ' : '') + appState.doctor.otherDegree;
-            const docMisc = appState.doctor.miscInfo ? appState.doctor.miscInfo.trim() : '';
-            const docReg = appState.doctor.regNo || '';
+            if (!degString && appState.doctor.qualification) degString = appState.doctor.qualification;
+            
+            const docMisc = appState.doctor.miscInfo ? appState.doctor.miscInfo.trim() : (appState.doctor.special || '');
+            const docReg = appState.doctor.regNo || appState.doctor.registration || '';
             const docPhone = appState.doctor.phone || '';
             const docAddress = appState.doctor.address || '';
 
