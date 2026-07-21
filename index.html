@@ -268,6 +268,11 @@
                         class="hidden w-full justify-start text-sm font-medium text-slate-600 hover:text-slate-800 transition-colors flex items-center gap-2 bg-slate-50 hover:bg-slate-100 px-3 py-2 rounded-md">
                         <i class="fa-solid fa-user-edit w-4"></i> Edit Profile
                     </button>
+                    <button id="nav-super-admin-btn"
+                        onclick="openSuperAdminDashboard(); document.getElementById('profile-menu').classList.add('hidden')"
+                        class="hidden w-full justify-start text-sm font-bold text-indigo-700 hover:text-indigo-900 transition-colors flex items-center gap-2 bg-indigo-50 hover:bg-indigo-100 px-3 py-2 rounded-md border border-indigo-100 shadow-sm">
+                        <i class="fa-solid fa-user-shield w-4"></i> Admin Panel
+                    </button>
                     <button onclick="logout(); document.getElementById('profile-menu').classList.add('hidden')"
                         id="nav-logout-btn"
                         class="w-full justify-start text-sm font-medium text-slate-500 hover:text-red-500 transition-colors flex items-center gap-2 bg-slate-50 hover:bg-red-50 px-3 py-2 rounded-md">
@@ -1032,6 +1037,173 @@
             </div>
         </div>
 
+
+        <!-- ==================== SCREEN 5: SUPER ADMIN DASHBOARD ==================== -->
+        <div id="screen-5" class="hidden pb-24 max-w-7xl mx-auto w-full">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
+                    <i class="fa-solid fa-user-shield text-indigo-600"></i> Admin Panel
+                </h2>
+                <button onclick="setScreen('screen-2')" class="text-slate-600 bg-white hover:bg-slate-50 border border-slate-200 px-4 py-2 rounded-lg font-semibold text-sm transition-colors shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Pad
+                </button>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-6 overflow-hidden">
+                <div class="flex border-b border-slate-200 bg-slate-50 overflow-x-auto no-scrollbar">
+                    <button onclick="switchAdminTab('users')" id="tab-btn-users" class="admin-tab-btn flex-1 py-4 px-6 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 whitespace-nowrap">
+                        <i class="fa-solid fa-users mr-2"></i> Users
+                    </button>
+                    <button onclick="switchAdminTab('prescriptions')" id="tab-btn-prescriptions" class="admin-tab-btn flex-1 py-4 px-6 text-sm font-bold text-slate-500 hover:text-slate-700 whitespace-nowrap border-b-2 border-transparent">
+                        <i class="fa-solid fa-file-prescription mr-2"></i> All Prescriptions
+                    </button>
+                    <button onclick="switchAdminTab('coupons')" id="tab-btn-coupons" class="admin-tab-btn flex-1 py-4 px-6 text-sm font-bold text-slate-500 hover:text-slate-700 whitespace-nowrap border-b-2 border-transparent">
+                        <i class="fa-solid fa-ticket mr-2"></i> Coupons
+                    </button>
+                </div>
+                
+                <div class="p-4 sm:p-6">
+                    <!-- Tab: Users -->
+                    <div id="admin-tab-users" class="admin-tab-content">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-slate-700 text-lg">Registered Users</h3>
+                            <button onclick="fetchAdminUsers()" class="text-indigo-600 hover:text-indigo-800 text-sm font-semibold flex items-center gap-1"><i class="fa-solid fa-sync"></i> Refresh</button>
+                        </div>
+                        <div class="overflow-x-auto bg-white border border-slate-200 rounded-lg shadow-sm">
+                            <table class="w-full text-sm text-left">
+                                <thead class="bg-slate-50 text-slate-600 uppercase text-xs font-bold border-b border-slate-200">
+                                    <tr>
+                                        <th class="px-4 py-3">Email</th>
+                                        <th class="px-4 py-3">Joined</th>
+                                        <th class="px-4 py-3">Coupon Used</th>
+                                        <th class="px-4 py-3 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-users-list" class="divide-y divide-slate-100">
+                                    <tr><td colspan="4" class="px-4 py-6 text-center text-slate-500"><i class="fa-solid fa-circle-notch fa-spin text-indigo-500 mb-2 text-xl"></i><br>Loading users...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab: Prescriptions -->
+                    <div id="admin-tab-prescriptions" class="admin-tab-content hidden">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-slate-700 text-lg">Platform Prescriptions</h3>
+                            <button onclick="fetchAdminPrescriptions()" class="text-indigo-600 hover:text-indigo-800 text-sm font-semibold flex items-center gap-1"><i class="fa-solid fa-sync"></i> Refresh</button>
+                        </div>
+                        <!-- Advanced Admin Search & Filter -->
+                        <div class="bg-slate-50 p-5 rounded-xl shadow-sm border border-slate-200 mb-6">
+                            <h3 class="text-sm font-bold text-slate-700 mb-3 border-b border-slate-200 pb-2 cursor-pointer flex justify-between items-center md:cursor-default" onclick="toggleAdminSearchFilter()">
+                                <span><i class="fa-solid fa-filter text-slate-400 mr-2 md:hidden"></i> Search & Filter</span>
+                                <i id="admin-search-filter-chevron" class="fa-solid fa-chevron-down md:hidden text-slate-400 transition-transform duration-300"></i>
+                            </h3>
+                            <div id="admin-search-filter-content" class="hidden md:block">
+                                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                                    <div>
+                                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Patient Name</label>
+                                        <input type="text" id="admin-search-name" placeholder="E.g. Rahul..." class="border border-slate-300 rounded p-2 text-sm focus:border-indigo-500 outline-none w-full" onkeyup="handleAdminFilterChange()">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Doctor (Name/Email)</label>
+                                        <input type="text" id="admin-search-doctor" placeholder="E.g. Dr. Smith..." class="border border-slate-300 rounded p-2 text-sm focus:border-indigo-500 outline-none w-full" onkeyup="handleAdminFilterChange()">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Date</label>
+                                        <input type="date" id="admin-search-date" class="border border-slate-300 rounded p-2 text-sm focus:border-indigo-500 outline-none w-full" onchange="handleAdminFilterChange()">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Address</label>
+                                        <input type="text" id="admin-search-address" placeholder="E.g. Bankura..." class="border border-slate-300 rounded p-2 text-sm focus:border-indigo-500 outline-none w-full" onkeyup="handleAdminFilterChange()">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Phone</label>
+                                        <input type="text" id="admin-search-phone" placeholder="E.g. 9932..." class="border border-slate-300 rounded p-2 text-sm focus:border-indigo-500 outline-none w-full" onkeyup="handleAdminFilterChange()">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-indigo-500 uppercase tracking-wider mb-1 block">Follow-Up</label>
+                                        <input type="date" id="admin-search-follow" title="Follow-Up Date" class="border border-indigo-300 bg-indigo-50 rounded p-2 text-sm focus:border-indigo-600 outline-none w-full text-indigo-800" onchange="handleAdminFilterChange()">
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4 flex flex-col sm:flex-row items-start sm:items-center gap-6 border-t border-slate-200 pt-4 pb-1">
+                                    <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto custom-dropdown-container relative">
+                                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Sort By:</label>
+                                        <div class="relative inline-block text-left w-full sm:w-auto">
+                                            <button type="button" onclick="toggleDropdown('admin-sort-dropdown')" class="w-full sm:w-48 inline-flex justify-between items-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                                                <span id="admin-sort-dropdown-label">Newest First</span>
+                                                <i id="admin-sort-dropdown-chevron" class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform duration-300 ml-2"></i>
+                                            </button>
+                                            
+                                            <div id="admin-sort-dropdown" class="hidden absolute left-0 z-50 mt-1.5 w-full sm:w-48 origin-top-left rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none border border-slate-200 overflow-hidden transform opacity-100 scale-100 transition-all">
+                                                <div class="py-1 divide-y divide-slate-100">
+                                                    <button type="button" onclick="selectCustomOption('admin-sort', 'dateDesc', 'Newest First')" class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Newest First</button>
+                                                    <button type="button" onclick="selectCustomOption('admin-sort', 'dateAsc', 'Oldest First')" class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Oldest First</button>
+                                                    <button type="button" onclick="selectCustomOption('admin-sort', 'nameAsc', 'Name (A-Z)')" class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Name (A-Z)</button>
+                                                    <button type="button" onclick="selectCustomOption('admin-sort', 'nameDesc', 'Name (Z-A)')" class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Name (Z-A)</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto custom-dropdown-container relative">
+                                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Group By:</label>
+                                        <div class="relative inline-block text-left w-full sm:w-auto">
+                                            <button type="button" onclick="toggleDropdown('admin-group-dropdown')" class="w-full sm:w-[220px] inline-flex justify-between items-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                                                <span id="admin-group-dropdown-label">None</span>
+                                                <i id="admin-group-dropdown-chevron" class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform duration-300 ml-2"></i>
+                                            </button>
+                                            
+                                            <div id="admin-group-dropdown" class="hidden absolute left-0 z-50 mt-1.5 w-full sm:w-[220px] origin-top-left rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none border border-slate-200 overflow-hidden transform opacity-100 scale-100 transition-all">
+                                                <div class="py-1 divide-y divide-slate-100">
+                                                    <button type="button" onclick="selectCustomOption('admin-group', 'none', 'None')" class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">None</button>
+                                                    <button type="button" onclick="selectCustomOption('admin-group', 'doctorEmail', 'Doctor Email')" class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Doctor Email</button>
+                                                    <button type="button" onclick="selectCustomOption('admin-group', 'doctorName', 'Doctor Name')" class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Doctor Name</button>
+                                                    <button type="button" onclick="selectCustomOption('admin-group', 'exactName', 'Patient Exact Name')" class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Patient Exact Name</button>
+                                                    <button type="button" onclick="selectCustomOption('admin-group', 'similarName', 'Patient Similar Name')" class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Patient Similar Name</button>
+                                                    <button type="button" onclick="selectCustomOption('admin-group', 'exactAddress', 'Exact Address')" class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Exact Address</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="admin-prescriptions-list" class="space-y-4">
+                            <div class="text-center text-slate-500 py-10">Loading prescriptions...</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab: Coupons -->
+                    <div id="admin-tab-coupons" class="admin-tab-content hidden">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-slate-700 text-lg">Registration Coupons</h3>
+                            <div class="flex gap-3">
+                                <button onclick="fetchAdminCoupons()" class="text-indigo-600 hover:text-indigo-800 text-sm font-semibold flex items-center gap-1"><i class="fa-solid fa-sync"></i> Refresh</button>
+                                <button onclick="generateAdminCoupon()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded text-sm font-bold shadow-sm transition-colors flex items-center gap-1"><i class="fa-solid fa-plus"></i> Generate</button>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto bg-white border border-slate-200 rounded-lg shadow-sm">
+                            <table class="w-full text-sm text-left">
+                                <thead class="bg-slate-50 text-slate-600 uppercase text-xs font-bold border-b border-slate-200">
+                                    <tr>
+                                        <th class="px-4 py-3">Code</th>
+                                        <th class="px-4 py-3">Status</th>
+                                        <th class="px-4 py-3">Used By</th>
+                                        <th class="px-4 py-3">Created</th>
+                                        <th class="px-4 py-3 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-coupons-list" class="divide-y divide-slate-100">
+                                    <tr><td colspan="4" class="px-4 py-6 text-center text-slate-500">Loading coupons...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
     </main>
 
     <!-- Signature Modal -->
@@ -1306,6 +1478,9 @@
             }
         }
 
+        let isSuperAdmin = false;
+        let superAdminCreds = { email: '', password: '' };
+
         function toggleAuthMode(forceMode = null) {
             authMode = forceMode ? forceMode : (authMode === 'login' ? 'register' : 'login');
             document.getElementById('auth-title').innerText = authMode === 'login' ? 'Cloud Workspace' : 'Create Account';
@@ -1317,6 +1492,12 @@
             if (forgotBtn) {
                 if (authMode === 'login') forgotBtn.classList.remove('hidden');
                 else forgotBtn.classList.add('hidden');
+            }
+            
+            const couponContainer = document.getElementById('auth-coupon-container');
+            if (couponContainer) {
+                if (authMode === 'register') couponContainer.classList.remove('hidden');
+                else couponContainer.classList.add('hidden');
             }
         }
 
@@ -1372,12 +1553,24 @@
 
             try {
                 if (authMode === 'register') {
+                    const couponCode = document.getElementById('auth-coupon').value.trim();
+                    if (!couponCode) throw new Error("A valid Registration Coupon Code is required.");
+                    
+                    // 1. Validate Coupon
+                    const { data: isValid, error: couponErr } = await supabaseClient.rpc('validate_coupon', { p_code: couponCode });
+                    if (couponErr) throw couponErr;
+                    if (!isValid) throw new Error("Invalid or already used coupon code.");
+                    
+                    // 2. Proceed with registration
                     const { data, error } = await supabaseClient.auth.signUp({
                         email,
                         password,
-                        options: { data: { temporary_settings: appState.doctor } } // Pass dynamic fallback state metadata
+                        options: { data: { temporary_settings: appState.doctor } }
                     });
                     if (error) throw error;
+                    
+                    // 3. Consume the coupon
+                    await supabaseClient.rpc('consume_coupon', { p_code: couponCode, p_email: email });
 
                     // Success registration interception point
                     document.getElementById('auth-form').reset();
@@ -1387,6 +1580,37 @@
                     // Force the form layout view over to sign in mode so they can access their account once verified
                     setTimeout(() => { toggleAuthMode('login'); }, 4000);
                 } else {
+                    // Check Super Admin FIRST to bypass Auth
+                    const { data: isAdmin, error: adminErr } = await supabaseClient.rpc('check_super_admin', { p_email: email, p_password: password });
+                    
+                    if (isAdmin) {
+                        isSuperAdmin = true;
+                        superAdminCreds = { email, password };
+                        localStorage.setItem('superAdminCreds', JSON.stringify(superAdminCreds));
+                        toggleAuthModal(false);
+                        
+                        document.getElementById('nav-super-admin-btn').classList.remove('hidden');
+                        document.getElementById('nav-cloud-btn').classList.add('hidden');
+                        
+                        const backupBtn = document.getElementById('btn-backup-cloud');
+                        if (backupBtn) backupBtn.classList.add('hidden');
+                        
+                        const promptContainer = document.getElementById('login-prompt-container');
+                        if (promptContainer) promptContainer.classList.add('hidden');
+                        
+                        document.getElementById('nav-logout-btn').innerHTML = '<i class="fa-solid fa-sign-out-alt w-5 text-center mr-2"></i> Sign Out';
+                        document.getElementById('nav-actions').classList.remove('hidden');
+                        document.getElementById('nav-actions').classList.add('flex');
+                        
+                        // Set greeting
+                        document.getElementById('doctor-greeting').innerText = `Super Admin`;
+                        
+                        // Load Dashboard automatically
+                        openSuperAdminDashboard();
+                        return;
+                    }
+                
+                    // Normal login fallback
                     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                     if (error) throw error;
 
@@ -1444,6 +1668,36 @@
 
         async function authSessionStateCheck() {
             if (!supabaseClient) return;
+            
+            // Check Super Admin Session first
+            const storedAdmin = localStorage.getItem('superAdminCreds');
+            if (storedAdmin) {
+                try {
+                    const creds = JSON.parse(storedAdmin);
+                    const { data: isAdmin } = await supabaseClient.rpc('check_super_admin', { p_email: creds.email, p_password: creds.password });
+                    if (isAdmin) {
+                        isSuperAdmin = true;
+                        superAdminCreds = creds;
+                        document.getElementById('nav-super-admin-btn').classList.remove('hidden');
+                        document.getElementById('nav-cloud-btn').classList.add('hidden');
+                        const backupBtn = document.getElementById('btn-backup-cloud');
+                        if (backupBtn) backupBtn.classList.add('hidden');
+                        const promptContainer = document.getElementById('login-prompt-container');
+                        if (promptContainer) promptContainer.classList.add('hidden');
+                        document.getElementById('nav-logout-btn').innerHTML = '<i class="fa-solid fa-sign-out-alt w-5 text-center mr-2"></i> Sign Out';
+                        document.getElementById('nav-actions').classList.remove('hidden');
+                        document.getElementById('nav-actions').classList.add('flex');
+                        document.getElementById('doctor-greeting').innerText = `Super Admin`;
+                        return; // Bypass normal auth
+                    } else {
+                        localStorage.removeItem('superAdminCreds');
+                    }
+                } catch(e) {
+                    console.error("Super Admin check failed", e);
+                    localStorage.removeItem('superAdminCreds');
+                }
+            }
+
             try {
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 if (session && session.user) {
@@ -2323,6 +2577,8 @@
             // Close other dropdowns safely
             if (id !== 'sort-dropdown') closeDropdown('sort-dropdown');
             if (id !== 'group-dropdown') closeDropdown('group-dropdown');
+            if (id !== 'admin-sort-dropdown') closeDropdown('admin-sort-dropdown');
+            if (id !== 'admin-group-dropdown') closeDropdown('admin-group-dropdown');
 
             dropdown.classList.toggle('hidden');
             chevron.classList.toggle('rotate-180');
@@ -2345,7 +2601,25 @@
                 handleSortChange(value);
             } else if (type === 'group') {
                 handleGroupChange(value);
+            } else if (type === 'admin-sort' || type === 'admin-group') {
+                handleAdminFilterChange();
             }
+        }
+
+        function toggleAdminSearchFilter() {
+            const content = document.getElementById('admin-search-filter-content');
+            const chevron = document.getElementById('admin-search-filter-chevron');
+            if(content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                chevron.classList.add('rotate-180');
+            } else {
+                content.classList.add('hidden');
+                chevron.classList.remove('rotate-180');
+            }
+        }
+
+        function handleAdminFilterChange() {
+            renderAdminPrescriptions();
         }
 
         // Close custom dropdowns on outside click
@@ -2353,6 +2627,8 @@
             if (!e.target.closest('.custom-dropdown-container')) {
                 closeDropdown('sort-dropdown');
                 closeDropdown('group-dropdown');
+                closeDropdown('admin-sort-dropdown');
+                closeDropdown('admin-group-dropdown');
             }
         });
 
@@ -3534,7 +3810,340 @@
                 }
             }
         });
+
+        // =========================================================================
+        // SUPER ADMIN DASHBOARD LOGIC
+        // =========================================================================
+
+        let adminPrescriptions = []; // Cache for prescriptions
+        
+        function openSuperAdminDashboard() {
+            setScreen('screen-5');
+            document.getElementById('profile-menu').classList.add('hidden');
+            switchAdminTab('users');
+            fetchAdminUsers();
+        }
+
+        function switchAdminTab(tabId) {
+            const tabs = ['users', 'prescriptions', 'coupons'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-btn-${t}`);
+                const content = document.getElementById(`admin-tab-${t}`);
+                if (t === tabId) {
+                    btn.className = `admin-tab-btn flex-1 py-4 px-6 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 whitespace-nowrap`;
+                    content.classList.remove('hidden');
+                } else {
+                    btn.className = `admin-tab-btn flex-1 py-4 px-6 text-sm font-bold text-slate-500 hover:text-slate-700 whitespace-nowrap border-b-2 border-transparent`;
+                    content.classList.add('hidden');
+                }
+            });
+
+            if (tabId === 'users') fetchAdminUsers();
+            if (tabId === 'prescriptions') fetchAdminPrescriptions();
+            if (tabId === 'coupons') fetchAdminCoupons();
+        }
+
+        async function fetchAdminUsers() {
+            if (!isSuperAdmin || !supabaseClient) return;
+            const list = document.getElementById('admin-users-list');
+            list.innerHTML = '<tr><td colspan="4" class="px-4 py-6 text-center text-slate-500"><i class="fa-solid fa-circle-notch fa-spin text-indigo-500 mb-2 text-xl"></i><br>Loading users...</td></tr>';
+            
+            try {
+                const { data, error } = await supabaseClient.rpc('admin_get_users', { p_email: superAdminCreds.email, p_password: superAdminCreds.password });
+                if (error) throw error;
+                
+                if (!data || data.length === 0) {
+                    list.innerHTML = '<tr><td colspan="4" class="px-4 py-6 text-center text-slate-500">No users found.</td></tr>';
+                    return;
+                }
+
+                list.innerHTML = data.map(u => `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-4 py-3 font-medium text-slate-800">${u.email}</td>
+                        <td class="px-4 py-3 text-slate-500 text-xs">${new Date(u.created_at).toLocaleDateString()}</td>
+                        <td class="px-4 py-3">
+                            ${u.used_coupon === true ? '<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">Yes</span>' : '<span class="bg-slate-100 text-slate-500 px-2 py-1 rounded text-xs font-bold">No</span>'}
+                        </td>
+                        <td class="px-4 py-3 text-right">
+                            <button onclick="makeSuperAdmin('${u.email}')" class="text-indigo-600 hover:text-indigo-800 text-xs font-bold mr-3" title="Promote to Super Admin"><i class="fa-solid fa-user-shield"></i> Promote</button>
+                            <button onclick="deleteAdminUser('${u.id}', '${u.email}')" class="text-red-500 hover:text-red-700 text-xs font-bold" title="Delete User"><i class="fa-solid fa-trash"></i> Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+                list.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-red-500">Error loading users: ${err.message}</td></tr>`;
+            }
+        }
+
+        async function deleteAdminUser(id, email) {
+            if (!isSuperAdmin) return;
+            if (!confirm(`?? DANGER: Are you absolutely sure you want to delete user ${email}?
+
+This will instantly wipe their account, profile, and ALL their prescription data permanently.`)) return;
+            
+            try {
+                const { error } = await supabaseClient.rpc('admin_delete_user', { 
+                    p_email: superAdminCreds.email, 
+                    p_password: superAdminCreds.password,
+                    target_user_id: id 
+                });
+                if (error) throw error;
+                
+                alert(`User ${email} and all their data was deleted successfully.`);
+                fetchAdminUsers();
+            } catch (err) {
+                alert(`Failed to delete user: ${err.message}`);
+            }
+        }
+
+        async function makeSuperAdmin(email) {
+            if (!isSuperAdmin) return;
+            const newPassword = prompt(`Enter a new secure password for the new Super Admin (${email}):`);
+            if (!newPassword) return;
+            
+            try {
+                const { error } = await supabaseClient.rpc('admin_make_super_admin', {
+                    p_email: superAdminCreds.email,
+                    p_password: superAdminCreds.password,
+                    new_email: email,
+                    new_password: newPassword
+                });
+                if (error) throw error;
+                
+                alert(`${email} has been granted Super Admin access! They can now log in using this password.`);
+            } catch (err) {
+                alert(`Failed to grant super admin access: ${err.message}`);
+            }
+        }
+
+        async function fetchAdminPrescriptions() {
+            if (!isSuperAdmin) return;
+            const list = document.getElementById('admin-prescriptions-list');
+            list.innerHTML = '<div class="text-center text-slate-500 py-10"><i class="fa-solid fa-circle-notch fa-spin text-indigo-500 mb-2 text-xl"></i><br>Loading platform prescriptions...</div>';
+            
+            try {
+                const { data, error } = await supabaseClient.rpc('admin_get_prescriptions', { p_email: superAdminCreds.email, p_password: superAdminCreds.password });
+                if (error) throw error;
+                adminPrescriptions = data || [];
+                renderAdminPrescriptions();
+            } catch (err) {
+                console.error(err);
+                list.innerHTML = `<div class="text-center text-red-500 py-10">Error loading prescriptions: ${err.message}</div>`;
+            }
+        }
+
+        function renderAdminPrescriptions() {
+            const list = document.getElementById('admin-prescriptions-list');
+            
+            // Get filter values
+            let fName = document.getElementById('admin-search-name').value.trim().toLowerCase();
+            let fDoc = document.getElementById('admin-search-doctor').value.trim().toLowerCase();
+            let fDate = document.getElementById('admin-search-date').value;
+            let fAddress = document.getElementById('admin-search-address').value.trim().toLowerCase();
+            let fPhone = document.getElementById('admin-search-phone').value.trim().toLowerCase();
+            let fFollow = document.getElementById('admin-search-follow').value;
+            
+            let sortGroup = document.getElementById('admin-sort-dropdown-label').textContent;
+            let groupOpt = document.getElementById('admin-group-dropdown-label').textContent;
+            
+            // Map labels to keys
+            let currentSort = 'dateDesc';
+            if (sortGroup === 'Oldest First') currentSort = 'dateAsc';
+            if (sortGroup === 'Name (A-Z)') currentSort = 'nameAsc';
+            if (sortGroup === 'Name (Z-A)') currentSort = 'nameDesc';
+            
+            let currentGroup = 'none';
+            if (groupOpt === 'Doctor Email') currentGroup = 'doctorEmail';
+            if (groupOpt === 'Doctor Name') currentGroup = 'doctorName';
+            if (groupOpt === 'Patient Exact Name') currentGroup = 'exactName';
+            if (groupOpt === 'Patient Similar Name') currentGroup = 'similarName';
+            if (groupOpt === 'Exact Address') currentGroup = 'exactAddress';
+
+            let filtered = adminPrescriptions.filter(record => {
+                let p = record.prescription_data?.patient || {};
+                let c = record.prescription_data?.clinical || {};
+                let dName = record.prescription_data?.doctor?.name ? record.prescription_data.doctor.name.toLowerCase() : '';
+                
+                let matchName = !fName || (p.name && p.name.toLowerCase().includes(fName));
+                let matchDoc = !fDoc || ((record.doctor_email && record.doctor_email.toLowerCase().includes(fDoc)) || dName.includes(fDoc));
+                let matchDate = !fDate || (p.date && p.date.includes(fDate));
+                let matchAddress = !fAddress || (p.address && p.address.toLowerCase().includes(fAddress));
+                let matchPhone = !fPhone || (p.phone && p.phone.toLowerCase().includes(fPhone));
+                let matchFollow = !fFollow || (c.followUpDate && c.followUpDate.includes(fFollow));
+                
+                return matchName && matchDoc && matchDate && matchAddress && matchPhone && matchFollow;
+            });
+            
+            // Sorting
+            filtered.sort((a, b) => {
+                let pA = a.prescription_data?.patient || {};
+                let pB = b.prescription_data?.patient || {};
+                
+                let dateA = pA.date ? new Date(pA.date).getTime() : 0;
+                let dateB = pB.date ? new Date(pB.date).getTime() : 0;
+                
+                let nameA = (pA.name || '').toLowerCase();
+                let nameB = (pB.name || '').toLowerCase();
+                
+                if (currentSort === 'dateDesc') return dateB - dateA;
+                if (currentSort === 'dateAsc') return dateA - dateB;
+                if (currentSort === 'nameAsc') return nameA.localeCompare(nameB);
+                if (currentSort === 'nameDesc') return nameB.localeCompare(nameA);
+                return 0;
+            });
+            
+            if (filtered.length === 0) {
+                list.innerHTML = '<div class="text-center text-slate-500 py-10">No prescriptions found matching criteria.</div>';
+                return;
+            }
+            
+            if (currentGroup !== 'none') {
+                let grouped = {};
+                filtered.forEach(record => {
+                    let p = record.prescription_data?.patient || {};
+                    let key = 'Other';
+                    
+                    if(currentGroup === 'doctorEmail') key = record.doctor_email || 'Unknown Email';
+                    if(currentGroup === 'doctorName') key = record.prescription_data?.doctor?.name ? record.prescription_data.doctor.name.trim() : 'Unknown Doctor';
+                    if(currentGroup === 'exactName') key = p.name ? p.name.toLowerCase().trim() : 'Unknown Patient';
+                    if(currentGroup === 'similarName') key = p.name ? p.name.toLowerCase().substring(0, 3).trim() : 'Unknown';
+                    if(currentGroup === 'exactAddress') key = p.address ? p.address.toLowerCase().trim() : 'Unknown';
+                    
+                    if(!grouped[key]) grouped[key] = [];
+                    grouped[key].push(record);
+                });
+                
+                let html = '';
+                for (let k in grouped) {
+                    html += `<div class="mb-4"><h4 class="bg-indigo-50 text-indigo-800 text-xs font-bold uppercase tracking-wider px-3 py-2 rounded-t-lg border border-indigo-100">${k} (${grouped[k].length})</h4><div class="space-y-3 p-3 border border-t-0 border-indigo-100 rounded-b-lg">`;
+                    grouped[k].forEach(p => html += generateAdminRxCard(p));
+                    html += `</div></div>`;
+                }
+                list.innerHTML = html;
+            } else {
+                list.innerHTML = filtered.map(p => generateAdminRxCard(p)).join('');
+            }
+        }
+        
+        function generateAdminRxCard(p) {
+            let patName = p.patient_name || 'Unnamed Patient';
+            let date = new Date(p.updated_at).toLocaleDateString();
+            let drEmail = p.doctor_email || 'Unknown Email';
+            let drName = p.prescription_data?.doctor?.name || '';
+            let drDisplay = drName ? `${drName} (${drEmail})` : drEmail;
+            
+            return `
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 hover:shadow-md transition-shadow flex justify-between items-center">
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-sm">${patName}</h4>
+                        <div class="text-xs text-slate-500 mt-1 flex flex-col sm:flex-row gap-1 sm:gap-4">
+                            <span><i class="fa-solid fa-user-md"></i> ${drDisplay}</span>
+                            <span><i class="fa-solid fa-calendar"></i> ${date}</span>
+                        </div>
+                    </div>
+                    <button onclick="viewAdminPrescriptionModal('${p.id}')" class="text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-md text-xs font-bold transition-colors">
+                        View
+                    </button>
+                </div>
+            `;
+        }
+        
+        function viewAdminPrescriptionModal(id) {
+            const p = adminPrescriptions.find(x => x.id === id);
+            if(!p) return;
+            
+            let backupState = JSON.stringify(appState);
+            appState = JSON.parse(JSON.stringify(p.prescription_data));
+            
+            const modalHeader = document.getElementById('modal-header-actions');
+            if(modalHeader) {
+                modalHeader.innerHTML = `
+                    <button onclick="closePreviewModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors"><i class="fa-solid fa-times"></i></button>
+                `;
+            }
+
+            populatePrintTemplate('modal-print-container');
+            appState = JSON.parse(backupState);
+            
+            document.getElementById('preview-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            setTimeout(scaleModalPreview, 50);
+        }
+
+        async function fetchAdminCoupons() {
+            if (!isSuperAdmin) return;
+            const list = document.getElementById('admin-coupons-list');
+            list.innerHTML = '<tr><td colspan="4" class="px-4 py-6 text-center text-slate-500"><i class="fa-solid fa-circle-notch fa-spin text-indigo-500 mb-2 text-xl"></i><br>Loading coupons...</td></tr>';
+            
+            try {
+                const { data, error } = await supabaseClient.rpc('admin_get_coupons', { p_email: superAdminCreds.email, p_password: superAdminCreds.password });
+                if (error) throw error;
+                
+                if (!data || data.length === 0) {
+                    list.innerHTML = '<tr><td colspan="4" class="px-4 py-6 text-center text-slate-500">No coupons generated yet.</td></tr>';
+                    return;
+                }
+
+                list.innerHTML = data.map(c => `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-4 py-3 font-mono font-bold text-slate-800">${c.code}</td>
+                        <td class="px-4 py-3">
+                            ${c.is_used ? '<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold">Used</span>' : '<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">Active</span>'}
+                        </td>
+                        <td class="px-4 py-3 text-slate-600 text-xs">${c.used_by_email || '-'}</td>
+                        <td class="px-4 py-3 text-slate-500 text-xs">${new Date(c.created_at).toLocaleDateString()}</td>
+                        <td class="px-4 py-3 text-right">
+                            <button onclick="deleteAdminCoupon('${c.code}')" class="text-red-500 hover:text-red-700 text-xs font-bold" title="Delete Coupon"><i class="fa-solid fa-trash"></i> Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+                list.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-red-500">Error loading coupons: ${err.message}</td></tr>`;
+            }
+        }
+
+        async function generateAdminCoupon() {
+            if (!isSuperAdmin) return;
+            
+            const randomCode = 'PRO-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+            
+            try {
+                const { error } = await supabaseClient.rpc('admin_create_coupon', { 
+                    p_email: superAdminCreds.email, 
+                    p_password: superAdminCreds.password,
+                    new_code: randomCode 
+                });
+                if (error) throw error;
+                
+                alert(`New coupon generated: ${randomCode}`);
+                fetchAdminCoupons();
+            } catch (err) {
+                alert(`Failed to generate coupon: ${err.message}`);
+            }
+        }
+
+        async function deleteAdminCoupon(code) {
+            if (!isSuperAdmin) return;
+            if (!confirm(`Are you sure you want to delete coupon ${code}?`)) return;
+            
+            try {
+                const { error } = await supabaseClient.rpc('admin_delete_coupon', { 
+                    p_email: superAdminCreds.email, 
+                    p_password: superAdminCreds.password,
+                    target_code: code 
+                });
+                if (error) throw error;
+                
+                fetchAdminCoupons();
+            } catch (err) {
+                alert(`Failed to delete coupon: ${err.message}`);
+            }
+        }
+
     </script>
 </body>
+
 
 </html>
