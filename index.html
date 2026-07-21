@@ -244,12 +244,14 @@
                 <i class="fa-solid fa-file-medical text-xl"></i>
             </div>
             <h1 class="text-xl font-bold text-slate-800 tracking-tight flex items-center gap-1.5">
-                Dr. Rx 
-                <span class="text-[10px] font-black uppercase tracking-wider bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full border border-teal-200 shadow-sm leading-none mt-0.5">PRO</span>
+                Dr. Rx
+                <span
+                    class="text-[10px] font-black uppercase tracking-wider bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full border border-teal-200 shadow-sm leading-none mt-0.5">PRO</span>
             </h1>
         </div>
         <div id="nav-actions" class="hidden items-center gap-2 sm:gap-4 w-auto">
-            <div id="doctor-greeting" class="text-sm font-medium text-slate-700 flex-shrink max-w-[120px] sm:max-w-none"></div>
+            <div id="doctor-greeting"
+                class="text-sm font-medium text-slate-700 flex-shrink max-w-[120px] sm:max-w-none"></div>
 
             <button id="nav-cloud-btn" onclick="toggleAuthModal(true)"
                 class="justify-center text-sm font-bold text-teal-600 hover:text-teal-800 transition-colors flex items-center gap-2 bg-teal-50 hover:bg-teal-100 border border-teal-200 px-3 sm:px-4 py-2 rounded-md">
@@ -293,88 +295,95 @@
         class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
             <div id="auth-modal-content">
-            <div class="bg-slate-50 border-b border-slate-200 px-6 py-4 flex justify-between items-center">
-                <h3 id="auth-title" class="text-lg font-bold text-slate-800">Cloud Workspace</h3>
-                <button onclick="toggleAuthModal(false)" class="text-slate-400 hover:text-slate-600 transition-colors">
-                    <i class="fa-solid fa-times text-xl"></i>
-                </button>
-            </div>
-            <div class="p-6">
-                <div id="auth-error"
-                    class="hidden mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-md border border-red-100"></div>
-                <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">Email</label>
-                        <input type="email" id="auth-email" required
-                            class="w-full border border-slate-300 rounded-md p-2.5 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none">
-                    </div>
-                    <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <label class="block text-sm font-semibold text-slate-700">Password</label>
-                            <button type="button" id="auth-forgot-btn" onclick="handlePasswordReset()"
-                                class="text-xs text-teal-600 hover:text-teal-800 font-medium">Forgot Password?</button>
+                <div class="bg-slate-50 border-b border-slate-200 px-6 py-4 flex justify-between items-center">
+                    <h3 id="auth-title" class="text-lg font-bold text-slate-800">Cloud Workspace</h3>
+                    <button onclick="toggleAuthModal(false)"
+                        class="text-slate-400 hover:text-slate-600 transition-colors">
+                        <i class="fa-solid fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <div id="auth-error"
+                        class="hidden mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-md border border-red-100"></div>
+                    <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Email</label>
+                            <input type="email" id="auth-email" required
+                                class="w-full border border-slate-300 rounded-md p-2.5 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none">
                         </div>
-                        <input type="password" id="auth-password" required
-                            class="w-full border border-slate-300 rounded-md p-2.5 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none">
-                    </div>
-                    <div id="auth-coupon-container" class="hidden">
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">Registration Coupon Code <span class="text-red-500">*</span></label>
-                        <input type="text" id="auth-coupon" 
-                            class="w-full border border-slate-300 rounded-md p-2.5 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none font-mono uppercase"
-                            placeholder="PRO-XXXXXX">
-                    </div>
-                    <button type="submit" id="auth-submit-btn"
-                        class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-md shadow transition-colors">Sign
-                        In</button>
-                </form>
-                
-                <div id="oauth-divider" class="my-4 flex items-center justify-between">
-                    <span class="w-1/5 border-b border-slate-200 lg:w-1/4"></span>
-                    <span class="text-xs text-center text-slate-500 uppercase font-semibold">Or continue with</span>
-                    <span class="w-1/5 border-b border-slate-200 lg:w-1/4"></span>
-                </div>
-                
-                <button type="button" onclick="signInWithGoogle()" id="btn-oauth-google"
-                    class="w-full flex justify-center items-center gap-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold py-2.5 rounded-md shadow-sm transition-colors">
-                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="w-5 h-5">
-                    Google
-                </button>
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="block text-sm font-semibold text-slate-700">Password</label>
+                                <button type="button" id="auth-forgot-btn" onclick="handlePasswordReset()"
+                                    class="text-xs text-teal-600 hover:text-teal-800 font-medium">Forgot
+                                    Password?</button>
+                            </div>
+                            <input type="password" id="auth-password" required
+                                class="w-full border border-slate-300 rounded-md p-2.5 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none">
+                        </div>
+                        <div id="auth-coupon-container" class="hidden">
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Registration Coupon Code
+                                <span class="text-red-500">*</span></label>
+                            <input type="text" id="auth-coupon"
+                                class="w-full border border-slate-300 rounded-md p-2.5 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none font-mono uppercase"
+                                placeholder="PRO-XXXXXX">
+                        </div>
+                        <button type="submit" id="auth-submit-btn"
+                            class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-md shadow transition-colors">Sign
+                            In</button>
+                    </form>
 
-                <div class="mt-6 text-center">
-                    <button type="button" id="auth-toggle-btn" onclick="toggleAuthMode()"
-                        class="text-sm text-teal-600 hover:text-teal-800 font-medium">Don't have an account?
-                        Register</button>
+                    <div id="oauth-divider" class="my-4 flex items-center justify-between">
+                        <span class="w-1/5 border-b border-slate-200 lg:w-1/4"></span>
+                        <span class="text-xs text-center text-slate-500 uppercase font-semibold">Or continue with</span>
+                        <span class="w-1/5 border-b border-slate-200 lg:w-1/4"></span>
+                    </div>
+
+                    <button type="button" onclick="signInWithGoogle()" id="btn-oauth-google"
+                        class="w-full flex justify-center items-center gap-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold py-2.5 rounded-md shadow-sm transition-colors">
+                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="w-5 h-5">
+                        Google
+                    </button>
+
+                    <div class="mt-6 text-center">
+                        <button type="button" id="auth-toggle-btn" onclick="toggleAuthMode()"
+                            class="text-sm text-teal-600 hover:text-teal-800 font-medium">Don't have an account?
+                            Register</button>
+                    </div>
                 </div>
             </div>
+
+            <!-- OAUTH COUPON INTERCEPTOR UI (Hidden by default) -->
+            <div id="oauth-interceptor" class="hidden p-8 flex flex-col items-center justify-center h-full text-center">
+                <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mb-4 shadow-sm mx-auto">
+                    <i class="fa-solid fa-shield-halved text-2xl text-teal-600"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">Welcome!</h2>
+                <p class="text-sm text-slate-600 mb-6 max-w-xs mx-auto">You have successfully authenticated via Google.
+                    However, this platform is invite-only. Please enter your valid <b>Registration Coupon Code</b> to
+                    activate your account.</p>
+
+                <div class="w-full max-w-sm mx-auto space-y-4">
+                    <input type="text" id="interceptor-coupon"
+                        class="w-full border border-slate-300 rounded-md p-3 text-center focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none font-mono uppercase text-lg tracking-widest shadow-inner"
+                        placeholder="PRO-XXXXXX">
+
+                    <button type="button" onclick="submitOauthCoupon()"
+                        class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-md shadow transition-colors">
+                        Activate Account
+                    </button>
+
+                    <button type="button" onclick="cancelOauthInterceptor()"
+                        class="w-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-500 font-bold py-2 rounded-md transition-colors text-sm">
+                        Cancel & Sign Out
+                    </button>
+                </div>
+
+                <div id="interceptor-error"
+                    class="hidden mx-auto mt-4 p-3 bg-red-50 text-red-600 text-sm rounded-md border border-red-100 w-full max-w-sm">
+                </div>
             </div>
-        
-        <!-- OAUTH COUPON INTERCEPTOR UI (Hidden by default) -->
-        <div id="oauth-interceptor" class="hidden p-8 flex flex-col items-center justify-center h-full text-center">
-            <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mb-4 shadow-sm mx-auto">
-                <i class="fa-solid fa-shield-halved text-2xl text-teal-600"></i>
-            </div>
-            <h2 class="text-2xl font-bold text-slate-800 mb-2">Welcome!</h2>
-            <p class="text-sm text-slate-600 mb-6 max-w-xs mx-auto">You have successfully authenticated via Google. However, this platform is invite-only. Please enter your valid <b>Registration Coupon Code</b> to activate your account.</p>
-            
-            <div class="w-full max-w-sm mx-auto space-y-4">
-                <input type="text" id="interceptor-coupon" 
-                    class="w-full border border-slate-300 rounded-md p-3 text-center focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none font-mono uppercase text-lg tracking-widest shadow-inner"
-                    placeholder="PRO-XXXXXX">
-                
-                <button type="button" onclick="submitOauthCoupon()"
-                    class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-md shadow transition-colors">
-                    Activate Account
-                </button>
-                
-                <button type="button" onclick="cancelOauthInterceptor()"
-                    class="w-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-500 font-bold py-2 rounded-md transition-colors text-sm">
-                    Cancel & Sign Out
-                </button>
-            </div>
-            
-            <div id="interceptor-error" class="hidden mx-auto mt-4 p-3 bg-red-50 text-red-600 text-sm rounded-md border border-red-100 w-full max-w-sm"></div>
-        </div>
-        
+
         </div>
     </div>
 
@@ -940,7 +949,7 @@
                             <label
                                 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Patient
                                 Name</label>
-                            <input type="text" id="search-name" placeholder="E.g. Rahul..."
+                            <input type="text" id="search-name" placeholder="E.g. Swaraj..."
                                 class="border border-slate-300 rounded p-2 text-sm focus:border-teal-500 outline-none w-full"
                                 onkeyup="handleSearchFilterChange()">
                         </div>
@@ -1096,34 +1105,41 @@
                 <h2 class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
                     <i class="fa-solid fa-user-shield text-indigo-600"></i> Admin Panel
                 </h2>
-                <button onclick="setScreen('screen-2')" class="text-slate-600 bg-white hover:bg-slate-50 border border-slate-200 px-4 py-2 rounded-lg font-semibold text-sm transition-colors shadow-sm flex items-center gap-2">
+                <button onclick="setScreen('screen-2')"
+                    class="text-slate-600 bg-white hover:bg-slate-50 border border-slate-200 px-4 py-2 rounded-lg font-semibold text-sm transition-colors shadow-sm flex items-center gap-2">
                     <i class="fa-solid fa-arrow-left"></i> Back to Pad
                 </button>
             </div>
-            
+
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-6 overflow-hidden">
                 <div class="flex border-b border-slate-200 bg-slate-50 overflow-x-auto no-scrollbar">
-                    <button onclick="switchAdminTab('users')" id="tab-btn-users" class="admin-tab-btn flex-1 py-4 px-6 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 whitespace-nowrap">
+                    <button onclick="switchAdminTab('users')" id="tab-btn-users"
+                        class="admin-tab-btn flex-1 py-4 px-6 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 whitespace-nowrap">
                         <i class="fa-solid fa-users mr-2"></i> Users
                     </button>
-                    <button onclick="switchAdminTab('prescriptions')" id="tab-btn-prescriptions" class="admin-tab-btn flex-1 py-4 px-6 text-sm font-bold text-slate-500 hover:text-slate-700 whitespace-nowrap border-b-2 border-transparent">
+                    <button onclick="switchAdminTab('prescriptions')" id="tab-btn-prescriptions"
+                        class="admin-tab-btn flex-1 py-4 px-6 text-sm font-bold text-slate-500 hover:text-slate-700 whitespace-nowrap border-b-2 border-transparent">
                         <i class="fa-solid fa-file-prescription mr-2"></i> All Prescriptions
                     </button>
-                    <button onclick="switchAdminTab('coupons')" id="tab-btn-coupons" class="admin-tab-btn flex-1 py-4 px-6 text-sm font-bold text-slate-500 hover:text-slate-700 whitespace-nowrap border-b-2 border-transparent">
+                    <button onclick="switchAdminTab('coupons')" id="tab-btn-coupons"
+                        class="admin-tab-btn flex-1 py-4 px-6 text-sm font-bold text-slate-500 hover:text-slate-700 whitespace-nowrap border-b-2 border-transparent">
                         <i class="fa-solid fa-ticket mr-2"></i> Coupons
                     </button>
                 </div>
-                
+
                 <div class="p-4 sm:p-6">
                     <!-- Tab: Users -->
                     <div id="admin-tab-users" class="admin-tab-content">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="font-bold text-slate-700 text-lg">Registered Users</h3>
-                            <button onclick="fetchAdminUsers()" class="text-indigo-600 hover:text-indigo-800 text-sm font-semibold flex items-center gap-1"><i class="fa-solid fa-sync"></i> Refresh</button>
+                            <button onclick="fetchAdminUsers()"
+                                class="text-indigo-600 hover:text-indigo-800 text-sm font-semibold flex items-center gap-1"><i
+                                    class="fa-solid fa-sync"></i> Refresh</button>
                         </div>
                         <div class="overflow-x-auto bg-white border border-slate-200 rounded-lg shadow-sm">
                             <table class="w-full text-sm text-left">
-                                <thead class="bg-slate-50 text-slate-600 uppercase text-xs font-bold border-b border-slate-200">
+                                <thead
+                                    class="bg-slate-50 text-slate-600 uppercase text-xs font-bold border-b border-slate-200">
                                     <tr>
                                         <th class="px-4 py-3">Email</th>
                                         <th class="px-4 py-3">Joined</th>
@@ -1132,88 +1148,157 @@
                                     </tr>
                                 </thead>
                                 <tbody id="admin-users-list" class="divide-y divide-slate-100">
-                                    <tr><td colspan="4" class="px-4 py-6 text-center text-slate-500"><i class="fa-solid fa-circle-notch fa-spin text-indigo-500 mb-2 text-xl"></i><br>Loading users...</td></tr>
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-6 text-center text-slate-500"><i
+                                                class="fa-solid fa-circle-notch fa-spin text-indigo-500 mb-2 text-xl"></i><br>Loading
+                                            users...</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                    
+
                     <!-- Tab: Prescriptions -->
                     <div id="admin-tab-prescriptions" class="admin-tab-content hidden">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="font-bold text-slate-700 text-lg">Platform Prescriptions</h3>
-                            <button onclick="fetchAdminPrescriptions()" class="text-indigo-600 hover:text-indigo-800 text-sm font-semibold flex items-center gap-1"><i class="fa-solid fa-sync"></i> Refresh</button>
+                            <button onclick="fetchAdminPrescriptions()"
+                                class="text-indigo-600 hover:text-indigo-800 text-sm font-semibold flex items-center gap-1"><i
+                                    class="fa-solid fa-sync"></i> Refresh</button>
                         </div>
                         <!-- Advanced Admin Search & Filter -->
                         <div class="bg-slate-50 p-5 rounded-xl shadow-sm border border-slate-200 mb-6">
-                            <h3 class="text-sm font-bold text-slate-700 mb-3 border-b border-slate-200 pb-2 cursor-pointer flex justify-between items-center md:cursor-default" onclick="toggleAdminSearchFilter()">
-                                <span><i class="fa-solid fa-filter text-slate-400 mr-2 md:hidden"></i> Search & Filter</span>
-                                <i id="admin-search-filter-chevron" class="fa-solid fa-chevron-down md:hidden text-slate-400 transition-transform duration-300"></i>
+                            <h3 class="text-sm font-bold text-slate-700 mb-3 border-b border-slate-200 pb-2 cursor-pointer flex justify-between items-center md:cursor-default"
+                                onclick="toggleAdminSearchFilter()">
+                                <span><i class="fa-solid fa-filter text-slate-400 mr-2 md:hidden"></i> Search &
+                                    Filter</span>
+                                <i id="admin-search-filter-chevron"
+                                    class="fa-solid fa-chevron-down md:hidden text-slate-400 transition-transform duration-300"></i>
                             </h3>
                             <div id="admin-search-filter-content" class="hidden md:block">
                                 <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3">
                                     <div>
-                                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Patient Name</label>
-                                        <input type="text" id="admin-search-name" placeholder="E.g. Rahul..." class="border border-slate-300 rounded p-2 text-sm focus:border-indigo-500 outline-none w-full" onkeyup="handleAdminFilterChange()">
+                                        <label
+                                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Patient
+                                            Name</label>
+                                        <input type="text" id="admin-search-name" placeholder="E.g. Rahul..."
+                                            class="border border-slate-300 rounded p-2 text-sm focus:border-indigo-500 outline-none w-full"
+                                            onkeyup="handleAdminFilterChange()">
                                     </div>
                                     <div>
-                                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Doctor (Name/Email)</label>
-                                        <input type="text" id="admin-search-doctor" placeholder="E.g. Dr. Smith..." class="border border-slate-300 rounded p-2 text-sm focus:border-indigo-500 outline-none w-full" onkeyup="handleAdminFilterChange()">
+                                        <label
+                                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Doctor
+                                            (Name/Email)</label>
+                                        <input type="text" id="admin-search-doctor" placeholder="E.g. Dr. Smith..."
+                                            class="border border-slate-300 rounded p-2 text-sm focus:border-indigo-500 outline-none w-full"
+                                            onkeyup="handleAdminFilterChange()">
                                     </div>
                                     <div>
-                                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Date</label>
-                                        <input type="date" id="admin-search-date" class="border border-slate-300 rounded p-2 text-sm focus:border-indigo-500 outline-none w-full" onchange="handleAdminFilterChange()">
+                                        <label
+                                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Date</label>
+                                        <input type="date" id="admin-search-date"
+                                            class="border border-slate-300 rounded p-2 text-sm focus:border-indigo-500 outline-none w-full"
+                                            onchange="handleAdminFilterChange()">
                                     </div>
                                     <div>
-                                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Address</label>
-                                        <input type="text" id="admin-search-address" placeholder="E.g. Bankura..." class="border border-slate-300 rounded p-2 text-sm focus:border-indigo-500 outline-none w-full" onkeyup="handleAdminFilterChange()">
+                                        <label
+                                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Address</label>
+                                        <input type="text" id="admin-search-address" placeholder="E.g. Bankura..."
+                                            class="border border-slate-300 rounded p-2 text-sm focus:border-indigo-500 outline-none w-full"
+                                            onkeyup="handleAdminFilterChange()">
                                     </div>
                                     <div>
-                                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Phone</label>
-                                        <input type="text" id="admin-search-phone" placeholder="E.g. 9932..." class="border border-slate-300 rounded p-2 text-sm focus:border-indigo-500 outline-none w-full" onkeyup="handleAdminFilterChange()">
+                                        <label
+                                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Phone</label>
+                                        <input type="text" id="admin-search-phone" placeholder="E.g. 9932..."
+                                            class="border border-slate-300 rounded p-2 text-sm focus:border-indigo-500 outline-none w-full"
+                                            onkeyup="handleAdminFilterChange()">
                                     </div>
                                     <div>
-                                        <label class="text-[10px] font-bold text-indigo-500 uppercase tracking-wider mb-1 block">Follow-Up</label>
-                                        <input type="date" id="admin-search-follow" title="Follow-Up Date" class="border border-indigo-300 bg-indigo-50 rounded p-2 text-sm focus:border-indigo-600 outline-none w-full text-indigo-800" onchange="handleAdminFilterChange()">
+                                        <label
+                                            class="text-[10px] font-bold text-indigo-500 uppercase tracking-wider mb-1 block">Follow-Up</label>
+                                        <input type="date" id="admin-search-follow" title="Follow-Up Date"
+                                            class="border border-indigo-300 bg-indigo-50 rounded p-2 text-sm focus:border-indigo-600 outline-none w-full text-indigo-800"
+                                            onchange="handleAdminFilterChange()">
                                     </div>
                                 </div>
-                                
-                                <div class="mt-4 flex flex-col sm:flex-row items-start sm:items-center gap-6 border-t border-slate-200 pt-4 pb-1">
-                                    <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto custom-dropdown-container relative">
-                                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Sort By:</label>
+
+                                <div
+                                    class="mt-4 flex flex-col sm:flex-row items-start sm:items-center gap-6 border-t border-slate-200 pt-4 pb-1">
+                                    <div
+                                        class="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto custom-dropdown-container relative">
+                                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Sort
+                                            By:</label>
                                         <div class="relative inline-block text-left w-full sm:w-auto">
-                                            <button type="button" onclick="toggleDropdown('admin-sort-dropdown')" class="w-full sm:w-48 inline-flex justify-between items-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                                            <button type="button" onclick="toggleDropdown('admin-sort-dropdown')"
+                                                class="w-full sm:w-48 inline-flex justify-between items-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
                                                 <span id="admin-sort-dropdown-label">Newest First</span>
-                                                <i id="admin-sort-dropdown-chevron" class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform duration-300 ml-2"></i>
+                                                <i id="admin-sort-dropdown-chevron"
+                                                    class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform duration-300 ml-2"></i>
                                             </button>
-                                            
-                                            <div id="admin-sort-dropdown" class="hidden absolute left-0 z-50 mt-1.5 w-full sm:w-48 origin-top-left rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none border border-slate-200 overflow-hidden transform opacity-100 scale-100 transition-all">
+
+                                            <div id="admin-sort-dropdown"
+                                                class="hidden absolute left-0 z-50 mt-1.5 w-full sm:w-48 origin-top-left rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none border border-slate-200 overflow-hidden transform opacity-100 scale-100 transition-all">
                                                 <div class="py-1 divide-y divide-slate-100">
-                                                    <button type="button" onclick="selectCustomOption('admin-sort', 'dateDesc', 'Newest First')" class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Newest First</button>
-                                                    <button type="button" onclick="selectCustomOption('admin-sort', 'dateAsc', 'Oldest First')" class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Oldest First</button>
-                                                    <button type="button" onclick="selectCustomOption('admin-sort', 'nameAsc', 'Name (A-Z)')" class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Name (A-Z)</button>
-                                                    <button type="button" onclick="selectCustomOption('admin-sort', 'nameDesc', 'Name (Z-A)')" class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Name (Z-A)</button>
+                                                    <button type="button"
+                                                        onclick="selectCustomOption('admin-sort', 'dateDesc', 'Newest First')"
+                                                        class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Newest
+                                                        First</button>
+                                                    <button type="button"
+                                                        onclick="selectCustomOption('admin-sort', 'dateAsc', 'Oldest First')"
+                                                        class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Oldest
+                                                        First</button>
+                                                    <button type="button"
+                                                        onclick="selectCustomOption('admin-sort', 'nameAsc', 'Name (A-Z)')"
+                                                        class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Name
+                                                        (A-Z)</button>
+                                                    <button type="button"
+                                                        onclick="selectCustomOption('admin-sort', 'nameDesc', 'Name (Z-A)')"
+                                                        class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Name
+                                                        (Z-A)</button>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto custom-dropdown-container relative">
-                                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Group By:</label>
+                                    <div
+                                        class="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto custom-dropdown-container relative">
+                                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Group
+                                            By:</label>
                                         <div class="relative inline-block text-left w-full sm:w-auto">
-                                            <button type="button" onclick="toggleDropdown('admin-group-dropdown')" class="w-full sm:w-[220px] inline-flex justify-between items-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                                            <button type="button" onclick="toggleDropdown('admin-group-dropdown')"
+                                                class="w-full sm:w-[220px] inline-flex justify-between items-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
                                                 <span id="admin-group-dropdown-label">None</span>
-                                                <i id="admin-group-dropdown-chevron" class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform duration-300 ml-2"></i>
+                                                <i id="admin-group-dropdown-chevron"
+                                                    class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform duration-300 ml-2"></i>
                                             </button>
-                                            
-                                            <div id="admin-group-dropdown" class="hidden absolute left-0 z-50 mt-1.5 w-full sm:w-[220px] origin-top-left rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none border border-slate-200 overflow-hidden transform opacity-100 scale-100 transition-all">
+
+                                            <div id="admin-group-dropdown"
+                                                class="hidden absolute left-0 z-50 mt-1.5 w-full sm:w-[220px] origin-top-left rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none border border-slate-200 overflow-hidden transform opacity-100 scale-100 transition-all">
                                                 <div class="py-1 divide-y divide-slate-100">
-                                                    <button type="button" onclick="selectCustomOption('admin-group', 'none', 'None')" class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">None</button>
-                                                    <button type="button" onclick="selectCustomOption('admin-group', 'doctorEmail', 'Doctor Email')" class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Doctor Email</button>
-                                                    <button type="button" onclick="selectCustomOption('admin-group', 'doctorName', 'Doctor Name')" class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Doctor Name</button>
-                                                    <button type="button" onclick="selectCustomOption('admin-group', 'exactName', 'Patient Exact Name')" class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Patient Exact Name</button>
-                                                    <button type="button" onclick="selectCustomOption('admin-group', 'similarName', 'Patient Similar Name')" class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Patient Similar Name</button>
-                                                    <button type="button" onclick="selectCustomOption('admin-group', 'exactAddress', 'Exact Address')" class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Exact Address</button>
+                                                    <button type="button"
+                                                        onclick="selectCustomOption('admin-group', 'none', 'None')"
+                                                        class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">None</button>
+                                                    <button type="button"
+                                                        onclick="selectCustomOption('admin-group', 'doctorEmail', 'Doctor Email')"
+                                                        class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Doctor
+                                                        Email</button>
+                                                    <button type="button"
+                                                        onclick="selectCustomOption('admin-group', 'doctorName', 'Doctor Name')"
+                                                        class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Doctor
+                                                        Name</button>
+                                                    <button type="button"
+                                                        onclick="selectCustomOption('admin-group', 'exactName', 'Patient Exact Name')"
+                                                        class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Patient
+                                                        Exact Name</button>
+                                                    <button type="button"
+                                                        onclick="selectCustomOption('admin-group', 'similarName', 'Patient Similar Name')"
+                                                        class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Patient
+                                                        Similar Name</button>
+                                                    <button type="button"
+                                                        onclick="selectCustomOption('admin-group', 'exactAddress', 'Exact Address')"
+                                                        class="text-slate-700 font-medium block w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Exact
+                                                        Address</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -1225,19 +1310,24 @@
                             <div class="text-center text-slate-500 py-10">Loading prescriptions...</div>
                         </div>
                     </div>
-                    
+
                     <!-- Tab: Coupons -->
                     <div id="admin-tab-coupons" class="admin-tab-content hidden">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="font-bold text-slate-700 text-lg">Registration Coupons</h3>
                             <div class="flex gap-3">
-                                <button onclick="fetchAdminCoupons()" class="text-indigo-600 hover:text-indigo-800 text-sm font-semibold flex items-center gap-1"><i class="fa-solid fa-sync"></i> Refresh</button>
-                                <button onclick="generateAdminCoupon()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded text-sm font-bold shadow-sm transition-colors flex items-center gap-1"><i class="fa-solid fa-plus"></i> Generate</button>
+                                <button onclick="fetchAdminCoupons()"
+                                    class="text-indigo-600 hover:text-indigo-800 text-sm font-semibold flex items-center gap-1"><i
+                                        class="fa-solid fa-sync"></i> Refresh</button>
+                                <button onclick="generateAdminCoupon()"
+                                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded text-sm font-bold shadow-sm transition-colors flex items-center gap-1"><i
+                                        class="fa-solid fa-plus"></i> Generate</button>
                             </div>
                         </div>
                         <div class="overflow-x-auto bg-white border border-slate-200 rounded-lg shadow-sm">
                             <table class="w-full text-sm text-left">
-                                <thead class="bg-slate-50 text-slate-600 uppercase text-xs font-bold border-b border-slate-200">
+                                <thead
+                                    class="bg-slate-50 text-slate-600 uppercase text-xs font-bold border-b border-slate-200">
                                     <tr>
                                         <th class="px-4 py-3">Code</th>
                                         <th class="px-4 py-3">Status</th>
@@ -1247,7 +1337,10 @@
                                     </tr>
                                 </thead>
                                 <tbody id="admin-coupons-list" class="divide-y divide-slate-100">
-                                    <tr><td colspan="4" class="px-4 py-6 text-center text-slate-500">Loading coupons...</td></tr>
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-6 text-center text-slate-500">Loading coupons...
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -1255,7 +1348,7 @@
                 </div>
             </div>
         </div>
-        
+
     </main>
 
     <!-- Signature Modal -->
@@ -1545,7 +1638,7 @@
                 if (authMode === 'login') forgotBtn.classList.remove('hidden');
                 else forgotBtn.classList.add('hidden');
             }
-            
+
             const couponContainer = document.getElementById('auth-coupon-container');
             if (couponContainer) {
                 if (authMode === 'register') couponContainer.classList.remove('hidden');
@@ -1607,12 +1700,12 @@
                 if (authMode === 'register') {
                     const couponCode = document.getElementById('auth-coupon').value.trim();
                     if (!couponCode) throw new Error("A valid Registration Coupon Code is required.");
-                    
+
                     // 1. Validate Coupon
                     const { data: isValid, error: couponErr } = await supabaseClient.rpc('validate_coupon', { p_code: couponCode });
                     if (couponErr) throw couponErr;
                     if (!isValid) throw new Error("Invalid or already used coupon code.");
-                    
+
                     // 2. Proceed with registration
                     const { data, error } = await supabaseClient.auth.signUp({
                         email,
@@ -1620,7 +1713,7 @@
                         options: { data: { temporary_settings: appState.doctor } }
                     });
                     if (error) throw error;
-                    
+
                     // 3. Consume the coupon
                     await supabaseClient.rpc('consume_coupon', { p_code: couponCode, p_email: email });
 
@@ -1634,34 +1727,34 @@
                 } else {
                     // Check Super Admin FIRST to bypass Auth
                     const { data: isAdmin, error: adminErr } = await supabaseClient.rpc('check_super_admin', { p_email: email, p_password: password });
-                    
+
                     if (isAdmin) {
                         isSuperAdmin = true;
                         superAdminCreds = { email, password };
                         localStorage.setItem('superAdminCreds', JSON.stringify(superAdminCreds));
                         toggleAuthModal(false);
-                        
+
                         document.getElementById('nav-super-admin-btn').classList.remove('hidden');
                         document.getElementById('nav-cloud-btn').classList.add('hidden');
-                        
+
                         const backupBtn = document.getElementById('btn-backup-cloud');
                         if (backupBtn) backupBtn.classList.add('hidden');
-                        
+
                         const promptContainer = document.getElementById('login-prompt-container');
                         if (promptContainer) promptContainer.classList.add('hidden');
-                        
+
                         document.getElementById('nav-logout-btn').innerHTML = '<i class="fa-solid fa-sign-out-alt w-5 text-center mr-2"></i> Sign Out';
                         document.getElementById('nav-actions').classList.remove('hidden');
                         document.getElementById('nav-actions').classList.add('flex');
-                        
+
                         // Set greeting
                         document.getElementById('doctor-greeting').innerText = `Super Admin`;
-                        
+
                         // Load Dashboard automatically
                         openSuperAdminDashboard();
                         return;
                     }
-                
+
                     // Normal login fallback
                     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                     if (error) throw error;
@@ -1710,7 +1803,7 @@
                 alert("Error initializing Google Sign-In: " + err.message);
             }
         }
-        
+
         async function cancelOauthInterceptor() {
             if (supabaseClient) await supabaseClient.auth.signOut();
             document.getElementById('oauth-interceptor').classList.add('hidden');
@@ -1722,29 +1815,29 @@
             if (!supabaseClient || !currentUser) return;
             const code = document.getElementById('interceptor-coupon').value.trim();
             const errDiv = document.getElementById('interceptor-error');
-            
+
             if (!code) {
                 errDiv.innerText = "Please enter a valid coupon code.";
                 errDiv.classList.remove('hidden');
                 return;
             }
-            
+
             try {
                 // Consume the coupon
                 const { data, error } = await supabaseClient.rpc('consume_coupon', { p_code: code, p_email: currentUser.email });
                 if (error) throw error;
-                
+
                 if (data === false) {
                     throw new Error("Invalid or already used coupon code.");
                 }
-                
+
                 // If success, re-run auth session check to proceed into app
                 errDiv.classList.add('hidden');
                 document.getElementById('oauth-interceptor').classList.add('hidden');
                 document.getElementById('auth-modal-content').classList.remove('hidden');
                 toggleAuthModal(false);
                 await authSessionStateCheck();
-                
+
             } catch (err) {
                 errDiv.innerText = err.message || "Failed to validate coupon.";
                 errDiv.classList.remove('hidden');
@@ -1775,7 +1868,7 @@
 
         async function authSessionStateCheck() {
             if (!supabaseClient) return;
-            
+
             // Check Super Admin Session first
             const storedAdmin = localStorage.getItem('superAdminCreds');
             if (storedAdmin) {
@@ -1800,7 +1893,7 @@
                     } else {
                         localStorage.removeItem('superAdminCreds');
                     }
-                } catch(e) {
+                } catch (e) {
                     console.error("Super Admin check failed", e);
                     localStorage.removeItem('superAdminCreds');
                 }
@@ -1810,13 +1903,13 @@
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 if (session && session.user) {
                     currentUser = session.user;
-                    
+
                     // OAuth Coupon Interception Check
                     // We check if the user has a valid coupon using the RPC
                     try {
                         const { data: hasCoupon, error: couponErr } = await supabaseClient.rpc('check_user_has_coupon', { p_email: currentUser.email });
                         if (couponErr) throw couponErr;
-                        
+
                         if (!hasCoupon && currentUser.id) {
                             // User is signed in but has not provided a coupon!
                             // Show interceptor UI
@@ -1829,7 +1922,7 @@
                         console.error("Error checking coupon status:", err);
                         return; // Halt on error
                     }
-                    
+
                     // Update UI for logged in state
                     document.getElementById('nav-cloud-btn').classList.add('hidden');
                     document.getElementById('btn-backup-cloud')?.classList.add('hidden');
@@ -2091,12 +2184,12 @@
 
             const data = record.prescription_data;
             appState = JSON.parse(JSON.stringify(data)); // deep copy
-            
+
             // Force letterhead to always match the CURRENT doctor profile, not the historical one
             try {
                 const currentProfile = localStorage.getItem('doctorProfile');
                 if (currentProfile) appState.doctor = JSON.parse(currentProfile);
-            } catch(e) {}
+            } catch (e) { }
 
             if (isTemplate) {
                 currentEditingPrescriptionId = null;
@@ -2315,7 +2408,7 @@
                     await supabaseClient.auth.signOut();
                     currentUser = null;
                 }
-                
+
                 if (isSuperAdmin) {
                     isSuperAdmin = false;
                     superAdminCreds = { email: '', password: '' };
@@ -2757,7 +2850,7 @@
         function toggleAdminSearchFilter() {
             const content = document.getElementById('admin-search-filter-content');
             const chevron = document.getElementById('admin-search-filter-chevron');
-            if(content.classList.contains('hidden')) {
+            if (content.classList.contains('hidden')) {
                 content.classList.remove('hidden');
                 chevron.classList.add('rotate-180');
             } else {
@@ -2887,20 +2980,20 @@
 
             let backupState = JSON.stringify(appState);
             appState = JSON.parse(JSON.stringify(record.prescription_data));
-            
+
             try {
                 const currentProfile = localStorage.getItem('doctorProfile');
                 if (currentProfile) appState.doctor = JSON.parse(currentProfile);
-            } catch(e) {}
+            } catch (e) { }
 
             appState.template = 'original';
 
             populatePrintTemplate('modal-print-container');
             const safeName = (record.patient_name || 'patient').replace(/[^a-z0-9]/gi, '_').toLowerCase();
-            
+
             // Re-hide after cloning if needed, though downloadPDF isolates anyway
             await downloadPDF('modal-print-container', safeName);
-            
+
             appState = JSON.parse(backupState);
             document.getElementById('modal-print-container').innerHTML = '';
         }
@@ -2941,12 +3034,12 @@
 
             let backupState = JSON.stringify(appState);
             appState = JSON.parse(JSON.stringify(record.prescription_data));
-            
+
             // Force letterhead to always match the CURRENT doctor profile
             try {
                 const currentProfile = localStorage.getItem('doctorProfile');
                 if (currentProfile) appState.doctor = JSON.parse(currentProfile);
-            } catch(e) {}
+            } catch (e) { }
 
             // Add the edit button to the modal header
             const modalHeader = document.getElementById('modal-header-actions');
@@ -3292,7 +3385,7 @@
             let degString = formattedDegrees.join(', ');
             if (appState.doctor.otherDegree) degString += (degString ? ', ' : '') + appState.doctor.otherDegree;
             if (!degString && appState.doctor.qualification) degString = appState.doctor.qualification;
-            
+
             const docMisc = appState.doctor.miscInfo ? appState.doctor.miscInfo.trim() : (appState.doctor.special || '');
             const docReg = appState.doctor.regNo || appState.doctor.registration || '';
             const docPhone = appState.doctor.phone || '';
@@ -3817,125 +3910,125 @@
                     }
                 });
 
-            // 2. Strip body clipping constraints so it can physically expand to the full multi-page height
-            const originalBodyClasses = document.body.className;
-            document.body.className = "bg-white font-sans";
-            document.body.style.overflow = 'visible';
-            document.body.style.height = 'auto';
-            document.documentElement.style.overflow = 'visible';
-            document.documentElement.style.height = 'auto';
+                // 2. Strip body clipping constraints so it can physically expand to the full multi-page height
+                const originalBodyClasses = document.body.className;
+                document.body.className = "bg-white font-sans";
+                document.body.style.overflow = 'visible';
+                document.body.style.height = 'auto';
+                document.documentElement.style.overflow = 'visible';
+                document.documentElement.style.height = 'auto';
 
-            // 3. Create a dedicated, perfect wrapper for our layout clone
-            const captureContainer = document.createElement('div');
-            captureContainer.style.width = '794px'; // Exact A4 width
-            captureContainer.style.margin = '0';
-            captureContainer.style.padding = '0';
-            captureContainer.style.background = 'white';
+                // 3. Create a dedicated, perfect wrapper for our layout clone
+                const captureContainer = document.createElement('div');
+                captureContainer.style.width = '794px'; // Exact A4 width
+                captureContainer.style.margin = '0';
+                captureContainer.style.padding = '0';
+                captureContainer.style.background = 'white';
 
-            // 4. Clone the layout perfectly
-            // CRITICAL: The modal preview container has a CSS transform: scale(X) applied 
-            // for display (so the A4 page fits mobile screens). We MUST reset this to scale(1) 
-            // before cloning so html2canvas captures the FULL unscaled content.
-            const originalTransform = element.style.transform;
-            const originalMarginBottom = element.style.marginBottom;
-            element.style.transform = 'scale(1)';
-            element.style.marginBottom = '0';
-            
-            const clone = element.cloneNode(true);
-            
-            // Restore the visual transform on the original so the modal preview is unchanged
-            element.style.transform = originalTransform;
-            element.style.marginBottom = originalMarginBottom;
-            
-            // Strip the vertical gaps from the clone to prevent PDF overflow pages
-            clone.classList.remove('gap-4', 'pb-8');
-            clone.style.transform = 'scale(1)';
-            clone.style.marginBottom = '0';
-            clone.style.width = '794px';
+                // 4. Clone the layout perfectly
+                // CRITICAL: The modal preview container has a CSS transform: scale(X) applied 
+                // for display (so the A4 page fits mobile screens). We MUST reset this to scale(1) 
+                // before cloning so html2canvas captures the FULL unscaled content.
+                const originalTransform = element.style.transform;
+                const originalMarginBottom = element.style.marginBottom;
+                element.style.transform = 'scale(1)';
+                element.style.marginBottom = '0';
 
-            // CRITICAL: Strip the margin-bottom from the individual pages inside the clone!
-            const pages = clone.querySelectorAll('.prescription-page');
-            pages.forEach((page, idx) => {
-                page.classList.remove('mb-8');
-                page.style.marginBottom = '0';
+                const clone = element.cloneNode(true);
 
-                // Anti-Ghost-Page trick: Reduce the height of the VERY LAST page by 1mm.
-                // This prevents browser sub-pixel floating point math from pushing the total canvas 
-                // height to something like 594.01mm, which forces jsPDF to spawn an empty 3rd page.
-                if (idx === pages.length - 1) {
-                    // Reduce last page by 2px to prevent ghost empty page generation
-                    page.style.height = '1120px';
-                }
-            });
+                // Restore the visual transform on the original so the modal preview is unchanged
+                element.style.transform = originalTransform;
+                element.style.marginBottom = originalMarginBottom;
 
-            captureContainer.appendChild(clone);
+                // Strip the vertical gaps from the clone to prevent PDF overflow pages
+                clone.classList.remove('gap-4', 'pb-8');
+                clone.style.transform = 'scale(1)';
+                clone.style.marginBottom = '0';
+                clone.style.width = '794px';
 
-            document.body.appendChild(captureContainer);
+                // CRITICAL: Strip the margin-bottom from the individual pages inside the clone!
+                const pages = clone.querySelectorAll('.prescription-page');
+                pages.forEach((page, idx) => {
+                    page.classList.remove('mb-8');
+                    page.style.marginBottom = '0';
 
-            const patientName = forcedFilename || (appState.patient.name.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'patient');
-
-            // 5. Configure html2pdf to grab the exact 210mm container
-            const opt = {
-                margin: 0,
-                filename: `Prescription_${patientName}.pdf`,
-                image: { type: 'jpeg', quality: 1.0 },
-                html2canvas: {
-                    scale: 2,
-                    useCORS: true,
-                    logging: false,
-                    scrollY: 0,
-                    windowWidth: 794,
-                    windowHeight: captureContainer.scrollHeight + 100,
-                    onclone: function(doc) {
-                        doc.documentElement.style.fontSize = '16px';
+                    // Anti-Ghost-Page trick: Reduce the height of the VERY LAST page by 1mm.
+                    // This prevents browser sub-pixel floating point math from pushing the total canvas 
+                    // height to something like 594.01mm, which forces jsPDF to spawn an empty 3rd page.
+                    if (idx === pages.length - 1) {
+                        // Reduce last page by 2px to prevent ghost empty page generation
+                        page.style.height = '1120px';
                     }
-                },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            const noPrintEls = clone.querySelectorAll('.no-print');
-            noPrintEls.forEach(el => el.style.display = 'none');
-
-            // 6. Wait 500ms for browser to natively paint the clean isolated clone layout
-            setTimeout(() => {
-                html2pdf().set(opt).from(captureContainer).save().then(() => {
-                    // Cleanup and restore UI
-                    document.body.removeChild(captureContainer);
-                    document.body.className = originalBodyClasses;
-                    document.body.style.overflow = '';
-                    document.body.style.height = '';
-                    document.documentElement.style.overflow = '';
-                    document.documentElement.style.height = '';
-
-                    for (const [child, display] of originalDisplays.entries()) {
-                        child.style.display = display;
-                    }
-                }).catch(err => {
-                    console.error("PDF generation pipeline exception error trace:", err);
-                    document.body.removeChild(captureContainer);
-                    document.body.className = originalBodyClasses;
-                    document.body.style.overflow = '';
-                    document.body.style.height = '';
-                    document.documentElement.style.overflow = '';
-                    document.documentElement.style.height = '';
-                    for (const [child, display] of originalDisplays.entries()) {
-                        child.style.display = display;
-                    }
-                    resolve();
-                }).catch(err => {
-                    console.error("PDF generation pipeline exception error trace:", err);
-                    document.body.removeChild(captureContainer);
-                    document.body.className = originalBodyClasses;
-                    document.body.style.overflow = '';
-                    document.body.style.height = '';
-                    document.documentElement.style.overflow = '';
-                    document.documentElement.style.height = '';
-                    for (const [child, display] of originalDisplays.entries()) {
-                        child.style.display = display;
-                    }
-                    resolve();
                 });
-            }, 500);
+
+                captureContainer.appendChild(clone);
+
+                document.body.appendChild(captureContainer);
+
+                const patientName = forcedFilename || (appState.patient.name.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'patient');
+
+                // 5. Configure html2pdf to grab the exact 210mm container
+                const opt = {
+                    margin: 0,
+                    filename: `Prescription_${patientName}.pdf`,
+                    image: { type: 'jpeg', quality: 1.0 },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        logging: false,
+                        scrollY: 0,
+                        windowWidth: 794,
+                        windowHeight: captureContainer.scrollHeight + 100,
+                        onclone: function (doc) {
+                            doc.documentElement.style.fontSize = '16px';
+                        }
+                    },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                const noPrintEls = clone.querySelectorAll('.no-print');
+                noPrintEls.forEach(el => el.style.display = 'none');
+
+                // 6. Wait 500ms for browser to natively paint the clean isolated clone layout
+                setTimeout(() => {
+                    html2pdf().set(opt).from(captureContainer).save().then(() => {
+                        // Cleanup and restore UI
+                        document.body.removeChild(captureContainer);
+                        document.body.className = originalBodyClasses;
+                        document.body.style.overflow = '';
+                        document.body.style.height = '';
+                        document.documentElement.style.overflow = '';
+                        document.documentElement.style.height = '';
+
+                        for (const [child, display] of originalDisplays.entries()) {
+                            child.style.display = display;
+                        }
+                    }).catch(err => {
+                        console.error("PDF generation pipeline exception error trace:", err);
+                        document.body.removeChild(captureContainer);
+                        document.body.className = originalBodyClasses;
+                        document.body.style.overflow = '';
+                        document.body.style.height = '';
+                        document.documentElement.style.overflow = '';
+                        document.documentElement.style.height = '';
+                        for (const [child, display] of originalDisplays.entries()) {
+                            child.style.display = display;
+                        }
+                        resolve();
+                    }).catch(err => {
+                        console.error("PDF generation pipeline exception error trace:", err);
+                        document.body.removeChild(captureContainer);
+                        document.body.className = originalBodyClasses;
+                        document.body.style.overflow = '';
+                        document.body.style.height = '';
+                        document.documentElement.style.overflow = '';
+                        document.documentElement.style.height = '';
+                        for (const [child, display] of originalDisplays.entries()) {
+                            child.style.display = display;
+                        }
+                        resolve();
+                    });
+                }, 500);
             });
         }
 
@@ -4048,7 +4141,7 @@
         // =========================================================================
 
         let adminPrescriptions = []; // Cache for prescriptions
-        
+
         function openSuperAdminDashboard() {
             setScreen('screen-5');
             document.getElementById('profile-menu').classList.add('hidden');
@@ -4079,11 +4172,11 @@
             if (!isSuperAdmin || !supabaseClient) return;
             const list = document.getElementById('admin-users-list');
             list.innerHTML = '<tr><td colspan="4" class="px-4 py-6 text-center text-slate-500"><i class="fa-solid fa-circle-notch fa-spin text-indigo-500 mb-2 text-xl"></i><br>Loading users...</td></tr>';
-            
+
             try {
                 const { data, error } = await supabaseClient.rpc('admin_get_users', { p_email: superAdminCreds.email, p_password: superAdminCreds.password });
                 if (error) throw error;
-                
+
                 if (!data || data.length === 0) {
                     list.innerHTML = '<tr><td colspan="4" class="px-4 py-6 text-center text-slate-500">No users found.</td></tr>';
                     return;
@@ -4113,15 +4206,15 @@
             if (!confirm(`?? DANGER: Are you absolutely sure you want to delete user ${email}?
 
 This will instantly wipe their account, profile, and ALL their prescription data permanently.`)) return;
-            
+
             try {
-                const { error } = await supabaseClient.rpc('admin_delete_user', { 
-                    p_email: superAdminCreds.email, 
+                const { error } = await supabaseClient.rpc('admin_delete_user', {
+                    p_email: superAdminCreds.email,
                     p_password: superAdminCreds.password,
-                    target_user_id: id 
+                    target_user_id: id
                 });
                 if (error) throw error;
-                
+
                 alert(`User ${email} and all their data was deleted successfully.`);
                 fetchAdminUsers();
             } catch (err) {
@@ -4133,7 +4226,7 @@ This will instantly wipe their account, profile, and ALL their prescription data
             if (!isSuperAdmin) return;
             const newPassword = prompt(`Enter a new secure password for the new Super Admin (${email}):`);
             if (!newPassword) return;
-            
+
             try {
                 const { error } = await supabaseClient.rpc('admin_make_super_admin', {
                     p_email: superAdminCreds.email,
@@ -4142,7 +4235,7 @@ This will instantly wipe their account, profile, and ALL their prescription data
                     new_password: newPassword
                 });
                 if (error) throw error;
-                
+
                 alert(`${email} has been granted Super Admin access! They can now log in using this password.`);
             } catch (err) {
                 alert(`Failed to grant super admin access: ${err.message}`);
@@ -4153,7 +4246,7 @@ This will instantly wipe their account, profile, and ALL their prescription data
             if (!isSuperAdmin) return;
             const list = document.getElementById('admin-prescriptions-list');
             list.innerHTML = '<div class="text-center text-slate-500 py-10"><i class="fa-solid fa-circle-notch fa-spin text-indigo-500 mb-2 text-xl"></i><br>Loading platform prescriptions...</div>';
-            
+
             try {
                 const { data, error } = await supabaseClient.rpc('admin_get_prescriptions', { p_email: superAdminCreds.email, p_password: superAdminCreds.password });
                 if (error) throw error;
@@ -4167,7 +4260,7 @@ This will instantly wipe their account, profile, and ALL their prescription data
 
         function renderAdminPrescriptions() {
             const list = document.getElementById('admin-prescriptions-list');
-            
+
             // Get filter values
             let fName = document.getElementById('admin-search-name').value.trim().toLowerCase();
             let fDoc = document.getElementById('admin-search-doctor').value.trim().toLowerCase();
@@ -4175,16 +4268,16 @@ This will instantly wipe their account, profile, and ALL their prescription data
             let fAddress = document.getElementById('admin-search-address').value.trim().toLowerCase();
             let fPhone = document.getElementById('admin-search-phone').value.trim().toLowerCase();
             let fFollow = document.getElementById('admin-search-follow').value;
-            
+
             let sortGroup = document.getElementById('admin-sort-dropdown-label').textContent;
             let groupOpt = document.getElementById('admin-group-dropdown-label').textContent;
-            
+
             // Map labels to keys
             let currentSort = 'dateDesc';
             if (sortGroup === 'Oldest First') currentSort = 'dateAsc';
             if (sortGroup === 'Name (A-Z)') currentSort = 'nameAsc';
             if (sortGroup === 'Name (Z-A)') currentSort = 'nameDesc';
-            
+
             let currentGroup = 'none';
             if (groupOpt === 'Doctor Email') currentGroup = 'doctorEmail';
             if (groupOpt === 'Doctor Name') currentGroup = 'doctorName';
@@ -4196,56 +4289,56 @@ This will instantly wipe their account, profile, and ALL their prescription data
                 let p = record.prescription_data?.patient || {};
                 let c = record.prescription_data?.clinical || {};
                 let dName = record.prescription_data?.doctor?.name ? record.prescription_data.doctor.name.toLowerCase() : '';
-                
+
                 let matchName = !fName || (p.name && p.name.toLowerCase().includes(fName));
                 let matchDoc = !fDoc || ((record.doctor_email && record.doctor_email.toLowerCase().includes(fDoc)) || dName.includes(fDoc));
                 let matchDate = !fDate || (p.date && p.date.includes(fDate));
                 let matchAddress = !fAddress || (p.address && p.address.toLowerCase().includes(fAddress));
                 let matchPhone = !fPhone || (p.phone && p.phone.toLowerCase().includes(fPhone));
                 let matchFollow = !fFollow || (c.followUpDate && c.followUpDate.includes(fFollow));
-                
+
                 return matchName && matchDoc && matchDate && matchAddress && matchPhone && matchFollow;
             });
-            
+
             // Sorting
             filtered.sort((a, b) => {
                 let pA = a.prescription_data?.patient || {};
                 let pB = b.prescription_data?.patient || {};
-                
+
                 let dateA = pA.date ? new Date(pA.date).getTime() : 0;
                 let dateB = pB.date ? new Date(pB.date).getTime() : 0;
-                
+
                 let nameA = (pA.name || '').toLowerCase();
                 let nameB = (pB.name || '').toLowerCase();
-                
+
                 if (currentSort === 'dateDesc') return dateB - dateA;
                 if (currentSort === 'dateAsc') return dateA - dateB;
                 if (currentSort === 'nameAsc') return nameA.localeCompare(nameB);
                 if (currentSort === 'nameDesc') return nameB.localeCompare(nameA);
                 return 0;
             });
-            
+
             if (filtered.length === 0) {
                 list.innerHTML = '<div class="text-center text-slate-500 py-10">No prescriptions found matching criteria.</div>';
                 return;
             }
-            
+
             if (currentGroup !== 'none') {
                 let grouped = {};
                 filtered.forEach(record => {
                     let p = record.prescription_data?.patient || {};
                     let key = 'Other';
-                    
-                    if(currentGroup === 'doctorEmail') key = record.doctor_email || 'Unknown Email';
-                    if(currentGroup === 'doctorName') key = record.prescription_data?.doctor?.name ? record.prescription_data.doctor.name.trim() : 'Unknown Doctor';
-                    if(currentGroup === 'exactName') key = p.name ? p.name.toLowerCase().trim() : 'Unknown Patient';
-                    if(currentGroup === 'similarName') key = p.name ? p.name.toLowerCase().substring(0, 3).trim() : 'Unknown';
-                    if(currentGroup === 'exactAddress') key = p.address ? p.address.toLowerCase().trim() : 'Unknown';
-                    
-                    if(!grouped[key]) grouped[key] = [];
+
+                    if (currentGroup === 'doctorEmail') key = record.doctor_email || 'Unknown Email';
+                    if (currentGroup === 'doctorName') key = record.prescription_data?.doctor?.name ? record.prescription_data.doctor.name.trim() : 'Unknown Doctor';
+                    if (currentGroup === 'exactName') key = p.name ? p.name.toLowerCase().trim() : 'Unknown Patient';
+                    if (currentGroup === 'similarName') key = p.name ? p.name.toLowerCase().substring(0, 3).trim() : 'Unknown';
+                    if (currentGroup === 'exactAddress') key = p.address ? p.address.toLowerCase().trim() : 'Unknown';
+
+                    if (!grouped[key]) grouped[key] = [];
                     grouped[key].push(record);
                 });
-                
+
                 let html = '';
                 for (let k in grouped) {
                     html += `<div class="mb-4"><h4 class="bg-indigo-50 text-indigo-800 text-xs font-bold uppercase tracking-wider px-3 py-2 rounded-t-lg border border-indigo-100">${k} (${grouped[k].length})</h4><div class="space-y-3 p-3 border border-t-0 border-indigo-100 rounded-b-lg">`;
@@ -4257,14 +4350,14 @@ This will instantly wipe their account, profile, and ALL their prescription data
                 list.innerHTML = filtered.map(p => generateAdminRxCard(p)).join('');
             }
         }
-        
+
         function generateAdminRxCard(p) {
             let patName = p.patient_name || 'Unnamed Patient';
             let date = new Date(p.updated_at).toLocaleDateString();
             let drEmail = p.doctor_email || 'Unknown Email';
             let drName = p.prescription_data?.doctor?.name || '';
             let drDisplay = drName ? `${drName} (${drEmail})` : drEmail;
-            
+
             return `
                 <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 hover:shadow-md transition-shadow flex justify-between items-center">
                     <div>
@@ -4280,22 +4373,22 @@ This will instantly wipe their account, profile, and ALL their prescription data
                 </div>
             `;
         }
-        
+
         function viewAdminPrescriptionModal(id) {
             const p = adminPrescriptions.find(x => x.id === id);
-            if(!p) return;
-            
+            if (!p) return;
+
             let backupState = JSON.stringify(appState);
             appState = JSON.parse(JSON.stringify(p.prescription_data));
-            
+
             // Force letterhead to always match the CURRENT doctor profile
             try {
                 const currentProfile = localStorage.getItem('doctorProfile');
                 if (currentProfile) appState.doctor = JSON.parse(currentProfile);
-            } catch(e) {}
-            
+            } catch (e) { }
+
             const modalHeader = document.getElementById('modal-header-actions');
-            if(modalHeader) {
+            if (modalHeader) {
                 const safeName = (p.patient_name || 'patient').replace(/[^a-z0-9]/gi, '_').toLowerCase();
                 modalHeader.innerHTML = `
                     <select onchange="changeModalTemplate(this.value)" id="modal-template-select" style="appearance:none;background-image:url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%234f46e5%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E');background-repeat:no-repeat;background-position:right 10px center;background-size:14px;" class="border-2 border-indigo-200 rounded-xl py-2 pl-4 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 bg-indigo-50 font-semibold text-indigo-700 cursor-pointer transition-all hover:border-indigo-400 hover:bg-indigo-100 shadow-sm max-w-[180px]"><option value="original">Template 1: Standard</option><option value="modern">Template 2: Modern Teal</option><option value="editorial">Template 3: Editorial</option><option value="compact">Template 4: Compact</option><option value="classic">Template 5: Classic</option></select>
@@ -4305,7 +4398,7 @@ This will instantly wipe their account, profile, and ALL their prescription data
 
             populatePrintTemplate('modal-print-container');
             window.backupAppState = backupState;
-            
+
             document.getElementById('preview-modal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
             setTimeout(scaleModalPreview, 50);
@@ -4315,11 +4408,11 @@ This will instantly wipe their account, profile, and ALL their prescription data
             if (!isSuperAdmin) return;
             const list = document.getElementById('admin-coupons-list');
             list.innerHTML = '<tr><td colspan="4" class="px-4 py-6 text-center text-slate-500"><i class="fa-solid fa-circle-notch fa-spin text-indigo-500 mb-2 text-xl"></i><br>Loading coupons...</td></tr>';
-            
+
             try {
                 const { data, error } = await supabaseClient.rpc('admin_get_coupons', { p_email: superAdminCreds.email, p_password: superAdminCreds.password });
                 if (error) throw error;
-                
+
                 if (!data || data.length === 0) {
                     list.innerHTML = '<tr><td colspan="4" class="px-4 py-6 text-center text-slate-500">No coupons generated yet.</td></tr>';
                     return;
@@ -4346,17 +4439,17 @@ This will instantly wipe their account, profile, and ALL their prescription data
 
         async function generateAdminCoupon() {
             if (!isSuperAdmin) return;
-            
+
             const randomCode = 'PRO-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-            
+
             try {
-                const { error } = await supabaseClient.rpc('admin_create_coupon', { 
-                    p_email: superAdminCreds.email, 
+                const { error } = await supabaseClient.rpc('admin_create_coupon', {
+                    p_email: superAdminCreds.email,
                     p_password: superAdminCreds.password,
-                    new_code: randomCode 
+                    new_code: randomCode
                 });
                 if (error) throw error;
-                
+
                 alert(`New coupon generated: ${randomCode}`);
                 fetchAdminCoupons();
             } catch (err) {
@@ -4367,15 +4460,15 @@ This will instantly wipe their account, profile, and ALL their prescription data
         async function deleteAdminCoupon(code) {
             if (!isSuperAdmin) return;
             if (!confirm(`Are you sure you want to delete coupon ${code}?`)) return;
-            
+
             try {
-                const { error } = await supabaseClient.rpc('admin_delete_coupon', { 
-                    p_email: superAdminCreds.email, 
+                const { error } = await supabaseClient.rpc('admin_delete_coupon', {
+                    p_email: superAdminCreds.email,
                     p_password: superAdminCreds.password,
-                    target_code: code 
+                    target_code: code
                 });
                 if (error) throw error;
-                
+
                 fetchAdminCoupons();
             } catch (err) {
                 alert(`Failed to delete coupon: ${err.message}`);
@@ -4387,6 +4480,3 @@ This will instantly wipe their account, profile, and ALL their prescription data
 
 
 </html>
-
-
-
