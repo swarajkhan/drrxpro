@@ -292,6 +292,7 @@
     <div id="auth-modal"
         class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+            <div id="auth-modal-content">
             <div class="bg-slate-50 border-b border-slate-200 px-6 py-4 flex justify-between items-center">
                 <h3 id="auth-title" class="text-lg font-bold text-slate-800">Cloud Workspace</h3>
                 <button onclick="toggleAuthModal(false)" class="text-slate-400 hover:text-slate-600 transition-colors">
@@ -345,6 +346,35 @@
                         Register</button>
                 </div>
             </div>
+            </div>
+        
+        <!-- OAUTH COUPON INTERCEPTOR UI (Hidden by default) -->
+        <div id="oauth-interceptor" class="hidden p-8 flex flex-col items-center justify-center h-full text-center">
+            <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mb-4 shadow-sm mx-auto">
+                <i class="fa-solid fa-shield-halved text-2xl text-teal-600"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">Welcome!</h2>
+            <p class="text-sm text-slate-600 mb-6 max-w-xs mx-auto">You have successfully authenticated via Google. However, this platform is invite-only. Please enter your valid <b>Registration Coupon Code</b> to activate your account.</p>
+            
+            <div class="w-full max-w-sm mx-auto space-y-4">
+                <input type="text" id="interceptor-coupon" 
+                    class="w-full border border-slate-300 rounded-md p-3 text-center focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none font-mono uppercase text-lg tracking-widest shadow-inner"
+                    placeholder="PRO-XXXXXX">
+                
+                <button type="button" onclick="submitOauthCoupon()"
+                    class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-md shadow transition-colors">
+                    Activate Account
+                </button>
+                
+                <button type="button" onclick="cancelOauthInterceptor()"
+                    class="w-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-500 font-bold py-2 rounded-md transition-colors text-sm">
+                    Cancel & Sign Out
+                </button>
+            </div>
+            
+            <div id="interceptor-error" class="hidden mx-auto mt-4 p-3 bg-red-50 text-red-600 text-sm rounded-md border border-red-100 w-full max-w-sm"></div>
+        </div>
+        
         </div>
     </div>
 
