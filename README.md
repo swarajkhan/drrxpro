@@ -1,51 +1,53 @@
 <div align="center">
 
-# DrRx 🩺
+# Dr. Rx PRO
 
-**Your Clinical Companion**
+**The Ultimate Clinical Companion for Modern Healthcare Professionals**
 
-_A lightweight, high-performance, single-file web application designed to help doctors seamlessly generate, preview, and download beautifully formatted, print-ready A4 prescriptions in seconds._
-
-![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
-![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E)
-![html2pdf](https://img.shields.io/badge/html2pdf.js-FF5722?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
+*A premium, high-performance web application designed to help doctors seamlessly generate, manage, and distribute beautifully formatted, print-ready A4 prescriptions in seconds.*
 
 </div>
 
 ---
 
-## ⚡ Core Architecture
+## 🌟 Platform Highlights
 
-DrRx is engineered with a **zero-dependency, single-file architecture** (`index.html`). By bypassing traditional build steps, node modules, or backend server requirements, DrRx remains highly portable, exceptionally fast, and completely secure—running 100% on the client-side.
+Dr. Rx PRO is built to streamline the clinical workflow, saving doctors valuable time while ensuring every prescription reflects a premium, professional standard. From the moment a patient walks in to the moment they receive their prescription, Dr. Rx PRO handles the entire data lifecycle.
 
----
+### 💼 Smart Prescription Generation
+- **Dynamic Clinical Data:** Effortlessly input patient vitals, clinical notes, and advice with real-time formatting.
+- **Intelligent Medicine Registry:** Features an integrated, cloud-synchronized drug registry that provides instant, fuzzy-matched medicine recommendations as you type.
+- **Digital Signature Pad:** A fully interactive signature canvas allows doctors to securely append their authentic signature directly onto the digital document.
+- **One-Click PDF Export:** Instantly compile the live prescription into a razor-sharp, downloadable A4 PDF, ready for printing or digital sharing.
 
-## ✨ Key Features & UI Highlights
+### ☁️ Cloud Workspace & Archives
+- **Secure Cloud Backup:** Doctors can register for a Pro account to securely synchronize their entire prescription history and professional profile to the cloud.
+- **Advanced Search & Filter:** The Cloud Archives provide lightning-fast, real-time search capabilities. Instantly find past prescriptions by Patient Name, Phone Number, Date, or Address.
+- **Intelligent Grouping & Sorting:** Organize your archives effortlessly by grouping records by exact/similar names or sorting them chronologically and alphabetically.
+- **Instant A4 Previews:** Review any past prescription in a perfectly scaled, mobile-friendly A4 preview modal before deciding to download or reprint it.
 
-- **🎛️ Dynamic Data Binding:** Real-time client-side rendering structures for O/E vitals, dynamic patient metrics rows, interactive medication tables, and live-updating numbered lists for clinical notes and advices.
-- **✍️ HTML5 Signature Engine:** Fully interactive HTML5 signature canvas module, allowing doctors to securely append authentic signatures directly into the document structure.
-- **📱 Responsive Viewport Scaling:** Features a custom CSS aspect-ratio viewport transform scale engine. The A4 preview seamlessly shrinks to fit mobile viewports natively (eliminating horizontal scrolling) without compromising the high-fidelity 100% scale required for flawless print rendering.
-- **🧠 Smart UX Enhancements:** Employs intelligent, localized `localStorage` and `sessionStorage` arrays to persist state tracking. Includes a smart dashboard that detects the time of day and issues dynamic, personalized greetings ("Good Morning, Dr. 🌅").
-- **📄 Flawless PDF Compilation:** Integrated with `html2pdf.js` for perfect client-side vector compilation, transforming the live DOM structure into a razor-sharp, downloadable A4 PDF.
+### 🛡️ Super Admin & Access Control
+- **Exclusive Access:** Platform registration is strictly controlled via a secure Coupon System. New doctors must have a valid `PRO-` coupon code to create an account.
+- **Global Management Dashboard:** Dedicated Super Admins have access to a powerful control panel to oversee the entire platform.
+- **Platform-Wide Visibility:** Super Admins can search, filter, and view every prescription generated on the platform, grouped by specific doctors or patients.
+- **User Management:** Generate new access coupons on the fly, promote users to admin status, or securely manage and remove user accounts when necessary.
 
 ---
 
 ## 🎨 Visual Layout Options
 
-DrRx ships with 5 distinct, professional A4 layout themes to suit varying clinical branding needs. Selection state is effortlessly maintained via `sessionStorage`.
+Dr. Rx PRO ships with 5 distinct, professional A4 layout themes to suit varying clinical branding needs. 
 
-| Template Name                          | Design Philosophy                                                                                                           |
-| :------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------- |
-| **Template 1: Standard Comprehensive** | A traditional, highly structured two-column corporate-clinical aesthetic utilizing deep slate grays and refined typography. |
-| **Template 2: Modern Teal**            | A vibrant, contemporary layout utilizing soft teal accents, edge-to-edge structural blocks, and a clean modern grid.        |
-| **Template 3: Editorial Vibrant**      | A visually striking, contrast-heavy layout leveraging indigo blocks and dynamic typography for a premium presentation.      |
-| **Template 4: Compact Clean**          | A minimalist, hyper-efficient, space-saving design optimized for high-volume text scaling.                                  |
-| **Template 5: Executive Classic**      | A highly traditional, serif-driven, elegant design reminiscent of premium letterpressed corporate stationery.               |
+| Template Name | Design Philosophy |
+| :--- | :--- |
+| **Standard Comprehensive** | A traditional, highly structured corporate-clinical aesthetic utilizing deep slate grays and refined typography. |
+| **Modern Teal** | A vibrant, contemporary layout utilizing soft teal accents, edge-to-edge structural blocks, and a clean modern grid. |
+| **Editorial Vibrant** | A visually striking, contrast-heavy layout leveraging indigo blocks and dynamic typography for a premium presentation. |
+| **Compact Clean** | A minimalist, hyper-efficient, space-saving design optimized for high-volume text and clinical notes. |
+| **Executive Classic** | A highly traditional, serif-driven, elegant design reminiscent of premium letterpressed corporate stationery. |
 
 ---
 
 <div align="center">
-  <b>Designed with ❤️ for modern healthcare professionals.</b>
+  <b>Designed with care for modern healthcare professionals.</b>
 </div>
