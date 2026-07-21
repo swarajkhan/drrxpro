@@ -410,6 +410,23 @@
                             </div>
                             <div class="flex items-center gap-1.5 flex-wrap">
                                 <label class="flex items-center gap-2 cursor-pointer select-none">
+                                    <input type="checkbox" value="M.S." id="cb-ms"
+                                        onchange="toggleMajorInput('cb-ms', 'major-ms')"
+                                        class="doc-degree form-checkbox text-teal-600">
+                                    <span class="text-sm text-slate-700">M.S.</span>
+                                </label>
+                                <div class="relative inline-block">
+                                    <input type="text" id="major-ms"
+                                        oninput="handleLocalSuggestions('major-ms', 'suggestions-ms', 'ms')"
+                                        placeholder="(Major) [optional]"
+                                        class="hidden border border-slate-300 rounded px-2 py-0.5 text-xs min-w-[130px] max-w-[160px] outline-none focus:border-teal-500 placeholder-slate-400">
+                                    <div id="suggestions-ms"
+                                        class="hidden absolute left-0 right-0 top-full bg-white border border-slate-200 rounded-b-lg shadow-lg max-h-40 overflow-y-auto z-50 text-xs font-medium divide-y divide-slate-100">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <label class="flex items-center gap-2 cursor-pointer select-none">
                                     <input type="checkbox" value="D.M." id="cb-dm"
                                         onchange="toggleMajorInput('cb-dm', 'major-dm')"
                                         class="doc-degree form-checkbox text-teal-600">
@@ -495,7 +512,7 @@
                             class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded-md shadow-sm transition-colors flex items-center justify-center gap-2">
                             Proceed to Pad <i class="fa-solid fa-arrow-right"></i>
                         </button>
-                        <button type="button" onclick="handleLazySignUp()"
+                        <button id="btn-backup-cloud" type="button" onclick="handleLazySignUp()"
                             class="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold py-3 px-4 rounded-md shadow-sm border border-indigo-200 transition-colors flex items-center justify-center gap-2">
                             <i class="fa-solid fa-cloud-arrow-up"></i> Back up to Cloud & Register Account
                         </button>
@@ -529,7 +546,7 @@
             </div>
 
             <!-- Sign In / Sign Up Anchor -->
-            <div class="mt-6 text-center">
+            <div id="login-prompt-container" class="mt-6 text-center">
                 <button type="button" onclick="toggleAuthModal(true)" class="text-sm font-medium text-teal-600 hover:text-teal-800 transition-colors underline">
                     Already have an account? Log In to Cloud Workspace
                 </button>
@@ -722,9 +739,7 @@
             <!-- Sticky Bottom Bar -->
             <div
                 class="fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] p-4 z-40 no-print flex justify-center gap-4">
-                <button id="btn-save-cloud" onclick="saveCloudPrescription()" class="hidden bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105 flex items-center gap-2">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> Save to Cloud
-                </button>
+                
                 <button onclick="goToPreview()"
                     class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105 flex items-center gap-2">
                     <i class="fa-regular fa-eye"></i> Preview Prescription
@@ -778,6 +793,9 @@
             </div>
 
             <div id="download-actions" class="hidden mt-4 flex justify-center gap-4 flex-wrap no-print w-full px-4">
+                <button id="btn-save-cloud" onclick="saveAndDownload()" class="hidden w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105 flex items-center justify-center gap-2 text-lg">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Save & Download PDF
+                </button>
                 <button onclick="downloadPDF()"
                     class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105 flex items-center justify-center gap-2 text-lg">
                     <i class="fa-solid fa-download"></i> Download Print-Ready PDF
@@ -1108,6 +1126,7 @@
             appState.doctor.otherDegree = document.getElementById('doc-degree-other').value;
             appState.doctor.miscInfo = document.getElementById('doc-misc').value;
             appState.doctor.degreeMajors = {
+                "M.S.": document.getElementById('major-ms') ? document.getElementById('major-ms').value.trim() : "",
                 "M.D.": document.getElementById('major-md').value.trim(),
                 "D.M.": document.getElementById('major-dm').value.trim(),
                 "M.D.S.": document.getElementById('major-mds').value.trim()
@@ -1211,6 +1230,8 @@
                     currentUser = session.user;
                     // Update UI for logged in state
                     document.getElementById('nav-cloud-btn').classList.add('hidden');
+                    document.getElementById('btn-backup-cloud')?.classList.add('hidden');
+                    document.getElementById('login-prompt-container')?.classList.add('hidden');
                     document.getElementById('nav-edit-btn').classList.remove('hidden');
                     document.getElementById('nav-logout-btn').innerHTML = '<i class="fa-solid fa-sign-out-alt"></i> Sign Out';
                     const delBtn = document.getElementById('nav-delete-account-btn');
@@ -1240,6 +1261,8 @@
                 } else {
                     currentUser = null;
                     document.getElementById('nav-cloud-btn').classList.remove('hidden');
+                document.getElementById('btn-backup-cloud')?.classList.remove('hidden');
+                document.getElementById('login-prompt-container')?.classList.remove('hidden');
                     document.getElementById('nav-edit-btn').classList.add('hidden');
                     document.getElementById('nav-logout-btn').innerHTML = '<i class="fa-solid fa-sign-out-alt"></i> Reset Profile';
                     const delBtn = document.getElementById('nav-delete-account-btn');
@@ -1259,7 +1282,80 @@
             }
         }
         
+        
+        function populateDoctorProfileForm() {
+            if(!appState || !appState.doctor) return;
+            
+            const doc = appState.doctor;
+            if(document.getElementById('doc-name')) document.getElementById('doc-name').value = doc.name || '';
+            if(document.getElementById('doc-field')) {
+                document.getElementById('doc-field').value = doc.field || '';
+                toggleSpecialization(); // will hide/show spec-container based on field
+            }
+            
+            if(document.getElementById('doc-spec')) document.getElementById('doc-spec').value = doc.specialization || '';
+            
+            document.querySelectorAll('.doc-degree').forEach(cb => {
+                if(doc.degrees && doc.degrees.includes(cb.value)) {
+                    cb.checked = true;
+                } else {
+                    cb.checked = false;
+                }
+                
+                // Toggle input visibility for all majors manually
+                if(['M.D.', 'M.S.', 'D.M.', 'M.D.S.'].includes(cb.value)) {
+                    const majorIdMap = { 'M.D.': 'major-md', 'M.S.': 'major-ms', 'D.M.': 'major-dm', 'M.D.S.': 'major-mds' };
+                    const inputId = majorIdMap[cb.value];
+                    const inputEl = document.getElementById(inputId);
+                    if (inputEl) {
+                        if (cb.checked) {
+                            inputEl.classList.remove('hidden');
+                            inputEl.value = (doc.degreeMajors && doc.degreeMajors[cb.value]) ? doc.degreeMajors[cb.value] : '';
+                        } else {
+                            inputEl.classList.add('hidden');
+                            inputEl.value = '';
+                        }
+                    }
+                }
+            });
+            
+            const otherCb = document.getElementById('doc-other-degree');
+            const otherIn = document.getElementById('doc-other-degree-input');
+            if(otherCb) {
+                if(doc.degrees && doc.degrees.includes('Other')) {
+                    otherCb.checked = true;
+                    if(otherIn) {
+                        otherIn.classList.remove('hidden');
+                        otherIn.value = doc.otherDegree || '';
+                    }
+                } else {
+                    otherCb.checked = false;
+                    if(otherIn) {
+                        otherIn.classList.add('hidden');
+                        otherIn.value = '';
+                    }
+                }
+            }
+            
+            if(document.getElementById('doc-reg')) document.getElementById('doc-reg').value = doc.regNo || '';
+            if(document.getElementById('doc-misc')) document.getElementById('doc-misc').value = doc.miscInfo || '';
+            
+            if(document.getElementById('clinic-name')) document.getElementById('clinic-name').value = doc.clinicName || '';
+            if(document.getElementById('clinic-address')) document.getElementById('clinic-address').value = doc.clinicAddress || '';
+            if(document.getElementById('clinic-phone')) document.getElementById('clinic-phone').value = doc.clinicPhone || '';
+            if(document.getElementById('clinic-email')) document.getElementById('clinic-email').value = doc.clinicEmail || '';
+            
+            document.querySelectorAll('.template-preview').forEach(el => {
+                if (el.dataset.template === doc.template) {
+                    el.classList.add('ring-2', 'ring-teal-500');
+                } else {
+                    el.classList.remove('ring-2', 'ring-teal-500');
+                }
+            });
+        }
+
         function editProfile() {
+            populateDoctorProfileForm();
             setScreen('screen-1');
         }
 
@@ -1307,6 +1403,11 @@
             }
         }
 
+                async function saveAndDownload() {
+            await saveCloudPrescription();
+            downloadPDF();
+        }
+        
         async function saveCloudPrescription() {
             if(!supabaseClient || !currentUser) return;
             
@@ -1338,10 +1439,7 @@
                 }
             });
             
-            // Save signature
-            if (signaturePad && !signaturePad.isEmpty()) {
-                appState.signatureDataUrl = signaturePad.toDataURL();
-            }
+
 
             if(!appState.patient.name) {
                 alert("Patient name is required to save to cloud.");
@@ -1578,6 +1676,7 @@
             appState.doctor.otherDegree = document.getElementById('doc-degree-other').value;
             appState.doctor.miscInfo = document.getElementById('doc-misc').value;
             appState.doctor.degreeMajors = {
+                "M.S.": document.getElementById('major-ms') ? document.getElementById('major-ms').value.trim() : "",
                 "M.D.": document.getElementById('major-md').value.trim(),
                 "D.M.": document.getElementById('major-dm').value.trim(),
                 "M.D.S.": document.getElementById('major-mds').value.trim()
@@ -1623,6 +1722,8 @@
                 navActions.classList.remove('flex');
                 
                 document.getElementById('nav-cloud-btn').classList.remove('hidden');
+                document.getElementById('btn-backup-cloud')?.classList.remove('hidden');
+                document.getElementById('login-prompt-container')?.classList.remove('hidden');
                 document.getElementById('nav-edit-btn').classList.add('hidden');
                 document.getElementById('nav-logout-btn').innerHTML = '<i class="fa-solid fa-sign-out-alt"></i> Reset Profile';
                 const delBtn = document.getElementById('nav-delete-account-btn');
@@ -1952,8 +2053,8 @@
                 }
             });
 
-            const menus = ['suggestions-spec', 'suggestions-md', 'suggestions-dm', 'suggestions-mds'];
-            const inputs = ['doc-spec', 'major-md', 'major-dm', 'major-mds'];
+            const menus = ['suggestions-spec', 'suggestions-md', 'suggestions-ms', 'suggestions-dm', 'suggestions-mds'];
+            const inputs = ['doc-spec', 'major-md', 'major-ms', 'major-dm', 'major-mds'];
 
             inputs.forEach((id, idx) => {
                 const menu = document.getElementById(menus[idx]);
@@ -2195,433 +2296,414 @@
         }
 
         function populatePrintTemplate() {
-            let html = '';
+            let container = document.getElementById('prescription-print');
+            if (!container) return;
 
-            // Common Data Prep
-            const docName = appState.doctor.name;
+            // 1. Gather all dynamic header variables cleanly
+            const docName = appState.doctor.name || '';
             const docField = appState.doctor.field === 'Specialist' ? appState.doctor.specialization : appState.doctor.field;
             let baseDegrees = appState.doctor.degrees.filter(deg => deg !== 'Other');
             let formattedDegrees = baseDegrees.map(deg => {
                 let major = appState.doctor.degreeMajors && appState.doctor.degreeMajors[deg];
-                if (major && major.trim() !== '') {
-                    return `${deg} (${major.trim()})`;
-                }
-                return deg;
+                return major && major.trim() !== '' ? `${deg} (${major.trim()})` : deg;
             });
             let degString = formattedDegrees.join(', ');
             if (appState.doctor.otherDegree) degString += (degString ? ', ' : '') + appState.doctor.otherDegree;
             const docMisc = appState.doctor.miscInfo ? appState.doctor.miscInfo.trim() : '';
-            const miscHtml = docMisc ? `<p class="text-[11px] opacity-90 mt-0.5 italic tracking-wide">${docMisc}</p>` : '';
-            const miscHtmlAlt = docMisc ? `<p class="text-[11px] text-slate-500 mt-0.5 italic tracking-wide">${docMisc}</p>` : '';
-            const docReg = appState.doctor.regNo;
-            const docPhone = appState.doctor.phone;
-            const docAddress = appState.doctor.address;
+            const docReg = appState.doctor.regNo || '';
+            const docPhone = appState.doctor.phone || '';
+            const docAddress = appState.doctor.address || '';
 
             let dateParts = appState.patient.date.split('-');
             const displayDate = dateParts.length === 3 ? `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}` : appState.patient.date;
+            const pName = appState.patient.name || '';
+            const pAge = appState.patient.age || '';
+            const pSex = appState.patient.sex || '';
+            const pWeight = appState.patient.weight || '';
+            const pAddress = appState.patient.address || '';
 
-            const pName = appState.patient.name;
-            const pAge = appState.patient.age;
-            const pSex = appState.patient.sex;
-            const pWeight = appState.patient.weight;
-            const pAddress = appState.patient.address;
+            // 2. Format columns content data elements securely
+            let symptoms = document.getElementById('clin-symptoms')?.value?.trim() || '';
+            let bpSys = document.getElementById('vital-bp-sys')?.value || '';
+            let bpDia = document.getElementById('vital-bp-dia')?.value || '';
+            let pr = document.getElementById('vital-pr')?.value || '';
+            let spo2 = document.getElementById('vital-spo2')?.value || '';
+            let otherVit = document.getElementById('vital-other')?.value?.trim() || '';
+            let inves = document.getElementById('clin-investigations')?.value?.trim() || '';
 
-            // Left Column Content (OE, Notes)
-            let leftColHtml = '';
-            let symptoms = document.getElementById('clin-symptoms').value.trim();
-            if (symptoms) leftColHtml += `
-            <div class="mb-4">
-                <h4 class="font-bold text-sm text-slate-800 underline mb-1 tracking-wide">Symptoms</h4>
-                <p class="text-[13px] whitespace-pre-wrap text-slate-700">${symptoms}</p>
-            </div>`;
+            // 3. Setup Layout Generator Helper Blocks
+            function buildHeaderHTML(pageNum) {
+                const continuationBadge = pageNum > 1 ? `<div class="absolute top-3 right-6 text-[9px] bg-slate-800 text-white px-2 py-1 rounded shadow-sm font-bold tracking-widest uppercase z-50">PAGE ${pageNum} (CONTINUATION)</div>` : '';
+                if (appState.template === 'original' || appState.template === 'modern') {
+                    const bgPrimary = appState.template === 'modern' ? '#0f766e' : '#f87171';
+                    const bgCircle = appState.template === 'modern' ? '#0f766e' : '#f87171';
+                    const bgAccent = appState.template === 'modern' ? '#ccfbf1' : '#bae6fd';
+                    return `
+                    <div class="relative h-[220px] overflow-hidden bg-white w-full shrink-0">
+                        ${continuationBadge}
+                        <div class="absolute top-0 right-0 w-[65%] h-[180px] rounded-bl-full z-0" style="background-color: ${bgPrimary};"></div>
+                        <div class="absolute top-[-50px] left-[-50px] w-[300px] h-[300px] rounded-full z-0" style="background-color: ${bgAccent};"></div>
+                        <div class="absolute top-[130px] left-[50px] w-[120px] h-[120px] rounded-full z-10 flex justify-center items-center text-white text-[3rem]" style="background-color: ${bgCircle};">
+                            <i class="fa-solid fa-user-doctor drop-shadow-md opacity-90"></i>
+                        </div>
+                        <div class="relative z-20 flex justify-between pt-8 px-10">
+                            <div class="w-32 h-32"></div>
+                            <div class="text-white text-right w-3/5 pt-2 pr-6 leading-snug">
+                                <h1 class="text-3xl font-serif font-bold mb-2 tracking-wide">${docName}</h1>
+                                <p class="text-sm opacity-90 tracking-wide">${docField}</p>
+                                <p class="text-[13px] font-semibold opacity-90 mt-1">${degString}</p>
+                                ${docMisc ? `<p class="text-[11px] opacity-90 mt-0.5 italic tracking-wide">${docMisc}</p>` : ''}
+                                ${docReg ? `<p class="text-[11px] opacity-80 mt-1">Reg. no.- ${docReg}</p>` : ''}
+                            </div>
+                        </div>
+                        <div class="absolute bottom-1 right-10 text-[12px] font-semibold z-20 text-slate-800 tracking-wide">DATE: <span class="border-b border-dashed border-slate-400 inline-block w-24 text-center text-teal-800">${displayDate}</span></div>
+                    </div>`;
+                }
+                else if (appState.template === 'editorial') {
+                    return `
+                    <div class="px-10 py-8 bg-[#eef2ff] border-b-[4px] border-[#4338ca] relative overflow-hidden shrink-0">
+                        ${continuationBadge}
+                        <div class="absolute right-[-40px] top-[-40px] w-[150px] h-[150px] rounded-full bg-[#e0e7ff] opacity-50 z-0"></div>
+                        <div class="absolute left-[20%] bottom-[-20px] w-[80px] h-[80px] rounded-full bg-[#c7d2fe] opacity-30 z-0"></div>
+                        <div class="flex justify-between items-center w-full relative z-10">
+                            <div>
+                                <h1 class="text-4xl font-extrabold text-[#4338ca] mb-1 tracking-tight">${docName}</h1>
+                                <p class="text-[16px] font-bold text-slate-700 tracking-wide">${docField}</p>
+                                <p class="text-[13px] font-semibold text-slate-600 mt-1">${degString} ${docMisc ? '| ' + docMisc : ''}</p>
+                            </div>
+                            ${docReg ? `<div class="bg-white p-3 rounded-xl shadow-sm border border-[#c7d2fe] text-center min-w-[120px] text-[13px] font-bold text-[#4338ca]">Reg: ${docReg}</div>` : ''}
+                        </div>
+                    </div>`;
+                }
+                else if (appState.template === 'compact') {
+                    return `
+                    <div class="px-10 pt-8 pb-3 border-b-2 border-[#374151] flex justify-between items-end shrink-0 relative">
+                        ${continuationBadge}
+                        <div class="pb-1">
+                            <h1 class="text-3xl font-bold text-[#374151] uppercase tracking-tight leading-none mb-2">${docName}</h1>
+                            <p class="text-[13px] font-bold text-slate-600 uppercase tracking-widest mb-0.5">${docField}</p>
+                            <p class="text-[11px] text-slate-500">${degString} ${docReg ? '| Reg: ' + docReg : ''}</p>
+                        </div>
+                        <div class="text-right pb-1 text-[11px] text-slate-500">
+                            <p class="font-bold text-slate-600 tracking-wide mb-1"><i class="fa-solid fa-phone mr-1"></i>${docPhone}</p>
+                            <p class="max-w-[200px] whitespace-pre-wrap">${docAddress}</p>
+                        </div>
+                    </div>`;
+                }
+                else if (appState.template === 'classic') {
+                    return `
+                    <div class="pt-10 pb-5 px-10 text-center border-b-[3px] border-[#1e293b] shrink-0 relative">
+                        ${continuationBadge}
+                        <h1 class="text-4xl font-serif font-bold text-[#1e293b] uppercase tracking-wide mb-2">${docName}</h1>
+                        <p class="text-[15px] font-serif font-semibold text-slate-700 uppercase tracking-widest mb-1">${docField}</p>
+                        <p class="text-[13px] font-serif text-slate-600 mb-1">${degString} ${docReg ? '| Reg: ' + docReg : ''}</p>
+                        <p class="text-[12px] font-serif text-slate-500 italic">${docMisc}</p>
+                    </div>`;
+                }
+                else {
+                    return `
+                    <div class="px-10 py-6 bg-slate-100 border-b relative">
+                        ${continuationBadge}
+                        <div class="flex justify-between items-center w-full relative z-10">
+                            <div>
+                                <h1 class="text-4xl font-extrabold text-[#4338ca] mb-1 tracking-tight">${docName}</h1>
+                                <p class="text-[16px] font-bold text-slate-700 tracking-wide">${docField}</p>
+                                <p class="text-[13px] font-semibold text-slate-600 mt-1">${degString} | ${docMisc}</p>
+                            </div>
+                            ${docReg ? `<div class="bg-white p-3 rounded-xl shadow-sm border border-[#c7d2fe] text-center min-w-[120px] text-[13px] font-bold text-[#4338ca]">Reg: ${docReg}</div>` : ''}
+                        </div>
+                    </div>`;
+                }
+            }
 
-            let bpSys = document.getElementById('vital-bp-sys').value;
-            let bpDia = document.getElementById('vital-bp-dia').value;
-            let pr = document.getElementById('vital-pr').value;
-            let spo2 = document.getElementById('vital-spo2').value;
-            let otherVit = document.getElementById('vital-other').value.trim();
+            function buildPatientHTML() {
+                return `
+                <div class="px-10 py-3 border-y border-slate-300 mx-6 my-2 text-[13px] font-semibold flex flex-wrap gap-y-3 bg-slate-50 rounded-sm shrink-0">
+                    <div class="w-full flex items-end">
+                        <span class="mr-2 text-slate-500">NAME:</span>
+                        <span class="flex-grow text-[15px] font-bold text-slate-900 border-b border-dashed border-slate-300 uppercase tracking-wide pb-0.5">${pName}</span>
+                        <span class="ml-4 mr-2 text-slate-500">AGE:</span>
+                        <span class="w-12 text-center border-b border-dashed border-slate-300 pb-0.5">${pAge}</span>
+                        <span class="ml-4 mr-2 text-slate-500">SEX:</span>
+                        <span class="w-12 text-center border-b border-dashed border-slate-300 pb-0.5">${pSex}</span>
+                        <span class="ml-4 mr-2 text-slate-500">WEIGHT:</span>
+                        <span class="w-16 text-center border-b border-dashed border-slate-300 pb-0.5">${pWeight ? pWeight + ' kg' : ''}</span>
+                    </div>
+                    <div class="w-full flex items-end mt-1">
+                        <span class="mr-2 text-slate-500">ADDRESS:</span>
+                        <span class="flex-grow border-b border-dashed border-slate-300 font-normal text-slate-700 pb-0.5">${pAddress}</span>
+                    </div>
+                </div>`;
+            }
+
+            function buildFooterHTML() {
+                const bgAccentBar = appState.template === 'modern' ? '#0f766e' : '#22d3ee';
+                const bgBadge = appState.template === 'modern' ? '#ccfbf1' : '#fee2e2';
+                const textBadge = appState.template === 'modern' ? '#0f766e' : '#f87171';
+                const sigHtml = appState.signatureDataUrl ? `<img src="${appState.signatureDataUrl}" class="max-h-14 absolute bottom-0 left-1/2 transform -translate-x-1/2 object-contain" />` : '';
+                return `
+                <div class="absolute bottom-0 left-0 w-full px-10 py-4 flex justify-between items-end bg-white border-t-[8px] shrink-0 pb-6 z-30" style="border-color: ${bgAccentBar};">
+                    <div class="flex items-center gap-3 w-3/5">
+                        <div class="rounded-full w-8 h-8 flex justify-center items-center flex-shrink-0" style="background-color: ${bgBadge}; color: ${textBadge};">
+                            <i class="fa-solid fa-plus font-bold text-sm"></i>
+                        </div>
+                        <div class="text-[12px] font-medium text-slate-600 leading-snug">
+                            <strong class="text-slate-800 text-[13px] block mb-0.5">${docPhone}</strong>
+                            <span class="whitespace-pre-wrap">${docAddress}</span>
+                        </div>
+                    </div>
+                    <div class="w-[35%] flex flex-col items-center pl-4">
+                        <div class="h-16 w-full border-b border-slate-400 relative mb-1">
+                            ${sigHtml}
+                        </div>
+                        <p class="text-[11px] font-bold text-slate-800 text-center uppercase tracking-wide leading-tight">${docName}<br><span class="text-[9px] font-semibold text-slate-500 tracking-normal">SIGNATURE</span></p>
+                    </div>
+                </div>`;
+            }
+
+            // Helper to chunk long text blocks cleanly to avoid clipping on print pages
+            function chunkTextLines(text, title, maxWeight = 300) {
+                if (!text) return [];
+                const lines = text.split('\n');
+                const chunks = [];
+                let currentText = '';
+                let currentWeight = 0;
+
+                for (let line of lines) {
+                    let words = line.split(' ');
+                    for (let word of words) {
+                        let wordWeight = word.length + 1;
+                        if (currentWeight + wordWeight > maxWeight && currentWeight > 0) {
+                            chunks.push(currentText.trim());
+                            currentText = word + ' ';
+                            currentWeight = wordWeight;
+                        } else {
+                            currentText += word + ' ';
+                            currentWeight += wordWeight;
+                        }
+                    }
+                    currentText += '\n';
+                    currentWeight += 40; // Penalty weight for newlines taking vertical space
+
+                    if (currentWeight > maxWeight) {
+                        chunks.push(currentText.trim());
+                        currentText = '';
+                        currentWeight = 0;
+                    }
+                }
+                if (currentText.trim()) chunks.push(currentText.trim());
+
+                return chunks.map((chunk, index) => {
+                    let hTitle = index === 0 ? `<h4 class="font-bold text-sm text-slate-800 underline mb-1 tracking-wide">${title}</h4>` : '';
+                    return {
+                        html: `<div class="mb-4">${hTitle}<p class="text-[13px] whitespace-pre-wrap text-slate-700">${chunk}</p></div>`,
+                        weight: chunk.length + (chunk.split('\n').length * 40) + (index === 0 ? 50 : 0)
+                    };
+                });
+            }
+
+            // 4. Construct Content Blocks Arrays Dynamically
+            let leftItems = [];
+
+            if (symptoms) {
+                leftItems.push(...chunkTextLines(symptoms, 'Symptoms', 300));
+            }
+
             let vitalsHtml = '';
             if (bpSys && bpDia) vitalsHtml += `<li>BP - ${bpSys}/${bpDia} mmHg</li>`;
             if (pr) vitalsHtml += `<li>PR - ${pr} bpm</li>`;
             if (spo2) vitalsHtml += `<li>SpO2 - ${spo2}%</li>`;
             if (vitalsHtml || otherVit) {
-                leftColHtml += `
-            <div class="mb-4">
-                <h4 class="font-bold text-sm text-slate-800 underline mb-1 tracking-wide">O/E</h4>
-                <ul class="text-[12px] space-y-1 font-medium text-slate-800">${vitalsHtml}</ul>
-                ${otherVit ? `<p class="text-[12px] whitespace-pre-wrap mt-1 text-slate-700">${otherVit}</p>` : ''}
-            </div>`;
+                let html = `<div class="mb-4"><h4 class="font-bold text-sm text-slate-800 underline mb-1 tracking-wide">O/E</h4><ul class="text-[12px] space-y-1 font-medium text-slate-800">${vitalsHtml}</ul>${otherVit ? `<p class="text-[12px] whitespace-pre-wrap mt-1 text-slate-700">${otherVit}</p>` : ''}</div>`;
+                let weight = 50 + vitalsHtml.length + (otherVit ? otherVit.length + (otherVit.split('\n').length * 40) : 0);
+                leftItems.push({ html, weight });
+            }
+
+            function splitTextIntoWeights(text, maxWeight) {
+                if (!text) return [];
+                const lines = text.split('\n');
+                const chunks = [];
+                let currentText = '';
+                let currentWeight = 0;
+
+                for (let line of lines) {
+                    let words = line.split(' ');
+                    for (let word of words) {
+                        let wordWeight = word.length + 1;
+                        if (currentWeight + wordWeight > maxWeight && currentWeight > 0) {
+                            chunks.push(currentText.trim());
+                            currentText = word + ' ';
+                            currentWeight = wordWeight;
+                        } else {
+                            currentText += word + ' ';
+                            currentWeight += wordWeight;
+                        }
+                    }
+                    currentText += '\n';
+                    currentWeight += 40;
+
+                    if (currentWeight > maxWeight) {
+                        chunks.push(currentText.trim());
+                        currentText = '';
+                        currentWeight = 0;
+                    }
+                }
+                if (currentText.trim()) chunks.push(currentText.trim());
+                return chunks;
             }
 
             let validNotes = appState.clinical.notes.filter(n => n.trim() !== '');
             if (validNotes.length > 0) {
-                let nList = validNotes.map(n => `<li>${n}</li>`).join('');
-                leftColHtml += `
-            <div class="mb-4">
-                <h4 class="font-bold text-sm text-slate-800 underline mb-1 tracking-wide">Clinical Notes</h4>
-                <ol class="list-decimal list-outside ml-4 text-[12px] space-y-1 text-slate-700">${nList}</ol>
-            </div>`;
+                validNotes.forEach((note, index) => {
+                    let chunks = splitTextIntoWeights(note, 300);
+                    chunks.forEach((chunk, chunkIdx) => {
+                        let hTitle = (index === 0 && chunkIdx === 0) ? `<h4 class="font-bold text-sm text-slate-800 underline mb-2 tracking-wide">Clinical Notes</h4>` : '';
+                        let numText = chunkIdx === 0 ? `<span class="mr-2 text-[13px] text-slate-700 font-medium">${index + 1}.</span>` : `<span class="mr-2 text-[13px] text-transparent">${index + 1}.</span>`;
+                        let html = `<div class="${(index === 0 && chunkIdx === 0) ? 'mb-2' : 'mb-1'}">${hTitle}<div class="flex">${numText}<p class="text-[13px] whitespace-pre-wrap text-slate-700 leading-snug">${chunk}</p></div></div>`;
+                        let weight = chunk.length + (chunk.split('\n').length * 40) + (chunkIdx === 0 ? 20 : 0) + (index === 0 && chunkIdx === 0 ? 40 : 0);
+                        leftItems.push({ html, weight });
+                    });
+                });
             }
 
-            let inves = document.getElementById('clin-investigations').value.trim();
-            if (inves) leftColHtml += `
-            <div class="mb-4">
-                <h4 class="font-bold text-sm text-slate-800 underline mb-1 tracking-wide">Investigations</h4>
-                <p class="text-[13px] whitespace-pre-wrap text-slate-700">${inves}</p>
-            </div>`;
+            if (inves) {
+                leftItems.push(...chunkTextLines(inves, 'Investigations', 300));
+            }
 
-            // Right Column Content (Rx, Advices)
-            let rightColHtml = '';
-            let rxRows = '';
+            let rightItems = [];
             appState.rx.forEach(med => {
                 if (med.isEditing || !med.name) return;
                 let actualDose = med.dose === 'Other' ? med.doseOther : med.dose;
                 let notesHtml = med.notes ? `<div class="text-[11px] text-slate-500 italic mt-0.5">${med.notes}</div>` : '';
-                rxRows += `
-                <tr class="border-b border-slate-100 last:border-0 align-top">
-                    <td class="py-2 pr-2">
-                        <div class="font-bold text-[14px] text-slate-800">${med.name}</div>
-                        ${notesHtml}
-                    </td>
-                    <td class="py-2 pr-2 font-medium text-[13px]">${actualDose} tab</td>
-                    <td class="py-2 pr-2 text-[13px]">
-                        <span class="font-semibold">${med.freq1}</span><br>
-                        <span class="text-[11px] text-slate-600">${med.freq2}</span>
-                    </td>
-                    <td class="py-2 font-semibold text-[13px]">${med.duration}</td>
-                </tr>`;
+                let html = `
+                    <tr class="border-b border-slate-100 last:border-0 align-top">
+                        <td class="py-2 pr-2"><div class="font-bold text-[14px] text-slate-800">${med.name}</div>${notesHtml}</td>
+                        <td class="py-2 pr-2 font-medium text-[13px]">${actualDose} tab</td>
+                        <td class="py-2 pr-2 text-[13px]"><span class="font-semibold">${med.freq1}</span><br><span class="text-[11px] text-slate-600">${med.freq2}</span></td>
+                        <td class="py-2 font-semibold text-[13px]">${med.duration}</td>
+                    </tr>`;
+                rightItems.push({ type: 'rx', html: html, weight: 120 + (med.notes ? 40 : 0) });
             });
-
-            if (rxRows) {
-                rightColHtml += `
-            <div class="mt-2 mb-6">
-                <table class="w-full text-left text-slate-800 border-collapse">
-                    <thead>
-                        <tr class="border-b border-slate-300 text-[12px] text-slate-600 font-bold uppercase tracking-wide">
-                            <th class="py-1">Medicine Name</th>
-                            <th class="py-1">Dose</th>
-                            <th class="py-1">Timing</th>
-                            <th class="py-1">Days</th>
-                        </tr>
-                    </thead>
-                    <tbody>${rxRows}</tbody>
-                </table>
-            </div>`;
-            }
 
             let validAdvices = appState.clinical.advices.filter(a => a.trim() !== '');
             if (validAdvices.length > 0) {
-                let aList = validAdvices.map(a => `<li>${a}</li>`).join('');
-                rightColHtml += `
-            <div class="mb-6">
-                <h4 class="font-bold text-sm text-slate-800 underline mb-2 tracking-wide">Advices</h4>
-                <ol class="list-decimal list-outside ml-5 text-[13px] space-y-1.5 text-slate-700">${aList}</ol>
-            </div>`;
+                validAdvices.forEach((advice, index) => {
+                    let chunks = splitTextIntoWeights(advice, 300);
+                    chunks.forEach((chunk, chunkIdx) => {
+                        let numText = chunkIdx === 0 ? `<span class="mr-2 text-[13px] text-slate-700 font-medium">${index + 1}.</span>` : `<span class="mr-2 text-[13px] text-transparent">${index + 1}.</span>`;
+                        let html = `<div class="${(index === 0 && chunkIdx === 0) ? 'mt-4' : 'mt-1.5'} flex">${numText}<p class="text-[13px] text-slate-700 whitespace-pre-wrap leading-snug">${chunk}</p></div>`;
+                        let weight = chunk.length + (chunk.split('\n').length * 40) + (chunkIdx === 0 ? 20 : 0) + (index === 0 && chunkIdx === 0 ? 60 : 0);
+                        rightItems.push({ type: 'advice', html: html, weight: weight });
+                    });
+                });
             }
 
-            let fDate = document.getElementById('follow-date').value;
+            let fDate = document.getElementById('follow-date')?.value;
             if (fDate) {
                 let fdParts = fDate.split('-');
                 let fDisplay = fdParts.length === 3 ? `${fdParts[2]}/${fdParts[1]}/${fdParts[0]}` : fDate;
-                rightColHtml += `
-            <div class="text-[13px] font-semibold text-slate-800">
-                Follow-up check on: <span class="border-b border-dashed border-slate-400 inline-block text-center text-teal-800 font-bold px-2">${fDisplay}</span>
-            </div>`;
+                let html = `<div class="mt-6 mb-2 text-[13px] font-semibold text-slate-800">Follow-up check on: <span class="border-b border-dashed border-slate-400 inline-block text-center text-teal-800 font-bold px-2">${fDisplay}</span></div>`;
+                rightItems.push({ type: 'follow', html: html, weight: 100 });
             }
 
-            // Footer Signature HTML
-            const sigHtml = appState.signatureDataUrl ? `<img src="${appState.signatureDataUrl}" class="max-h-16 absolute bottom-0 object-contain" />` : '';
+            // 5. Intelligent Multi-Page Pagination Layout Chunking Generator Loop
+            let masterHTML = '';
+            let currentPageNum = 1;
+            let leftProcessedIndex = 0;
+            let rightProcessedIndex = 0;
+            let loopSafetyBrake = 0;
+            let forceGeneratePage = true; // Always generate at least 1 page even if form is blank
 
-            // ================= TEMPLATE RENDERING =================
-            if (appState.template === 'original') {
-                html = `
-                <div class="relative h-[220px] overflow-hidden bg-white">
-                    <div class="absolute top-0 right-0 w-[65%] h-[180px] bg-red-400 rounded-bl-full z-0"></div>
-                    <div class="absolute top-[-50px] left-[-50px] w-[300px] h-[300px] bg-cyan-200 rounded-full z-0"></div>
-                    <div class="absolute top-[130px] left-[50px] w-[120px] h-[120px] bg-red-400 rounded-full z-10 flex justify-center items-center text-white text-[3rem]">
-                        <i class="fa-solid fa-user-doctor drop-shadow-md opacity-90"></i>
-                    </div>
-                    <div class="relative z-20 flex justify-between pt-8 px-10">
-                        <div class="w-32 h-32"></div>
-                        <div class="text-white text-right w-3/5 pt-2 pr-6 leading-snug">
-                            <h1 class="text-3xl font-serif font-bold mb-2 tracking-wide">${docName}</h1>
-                            <p class="text-sm opacity-90 tracking-wide">${docField}</p>
-                            <p class="text-[13px] font-semibold opacity-90 mt-1">${degString}</p>
-                            ${miscHtml}
-                            ${docReg ? `<p class="text-[12px] opacity-80 mt-1">Reg. no.- ${docReg}</p>` : ''}
+            const MAX_LEFT_WEIGHT_PER_PAGE = 1150;
+            const MAX_RIGHT_WEIGHT_PER_PAGE = 1000;
+
+            while ((leftProcessedIndex < leftItems.length || rightProcessedIndex < rightItems.length || forceGeneratePage) && loopSafetyBrake < 10) {
+                forceGeneratePage = false;
+                loopSafetyBrake++;
+
+                let leftColumnSlice = '';
+                let currentLeftWeight = 0;
+
+                while (leftProcessedIndex < leftItems.length) {
+                    let item = leftItems[leftProcessedIndex];
+                    if (currentLeftWeight + item.weight > MAX_LEFT_WEIGHT_PER_PAGE && currentLeftWeight > 0) {
+                        break;
+                    }
+                    leftColumnSlice += item.html;
+                    currentLeftWeight += item.weight;
+                    leftProcessedIndex++;
+                }
+
+                let rxRowsSlice = '';
+                let advicesSlice = '';
+                let followSlice = '';
+                let currentRightWeight = 0;
+
+                while (rightProcessedIndex < rightItems.length) {
+                    let item = rightItems[rightProcessedIndex];
+                    if (currentRightWeight + item.weight > MAX_RIGHT_WEIGHT_PER_PAGE && currentRightWeight > 0) {
+                        break;
+                    }
+                    if (item.type === 'rx') rxRowsSlice += item.html;
+                    else if (item.type === 'advice') advicesSlice += item.html;
+                    else if (item.type === 'follow') followSlice += item.html;
+
+                    currentRightWeight += item.weight;
+                    rightProcessedIndex++;
+                }
+
+                let rightColHTML = '';
+                if (rxRowsSlice) {
+                    rightColHTML += `
+                    <div class="mt-2 mb-6 w-full">
+                        <h4 class="text-4xl font-serif font-bold text-slate-800 mb-6 tracking-tight flex items-center gap-1" style="color: #1e293b;"><span class="text-5xl font-normal leading-none" style="font-family: Georgia, serif;">R</span><span class="text-2xl mt-3 underline" style="font-family: Georgia, serif; text-underline-offset: 4px;">x</span></h4>
+                        <table class="w-full text-left text-slate-800 border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-300 text-[12px] text-slate-600 font-bold uppercase tracking-wide">
+                                    <th class="py-1">Medicine Name</th><th class="py-1">Dose</th><th class="py-1">Timing</th><th class="py-1">Days</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rxRowsSlice}</tbody>
+                        </table>
+                    </div>`;
+                }
+
+                if (advicesSlice) {
+                    rightColHTML += `<div class="mb-2"><h4 class="font-bold text-sm text-slate-800 underline mb-2 tracking-wide ${rxRowsSlice ? '' : 'mt-2'}">Advices ${rxRowsSlice ? '' : '(Cont.)'}</h4>${advicesSlice}</div>`;
+                }
+
+                if (followSlice) {
+                    rightColHTML += followSlice;
+                }
+
+                masterHTML += `
+                <div class="prescription-page a4-container shadow-lg relative mb-8 print:mb-0 print:shadow-none flex flex-col justify-between overflow-hidden" style="height: 297mm; box-sizing: border-box;">
+                    <div class="w-full flex flex-col">
+                        ${buildHeaderHTML(currentPageNum)}
+                        ${buildPatientHTML()}
+                        
+                        <!-- Content Frame body splits left and right layout segments cleanly -->
+                        <div class="px-10 flex relative mt-2 content-body-area" style="min-height: 155mm; max-height: 165mm;">
+                            <div class="w-[35%] pr-5 pt-2 border-r border-slate-200 flex flex-col relative page-break-inside-avoid">
+                                ${leftColumnSlice}
+                            </div>
+                            <div class="w-[65%] pl-6 pt-0 relative flex flex-col page-break-inside-avoid">
+                                ${rightColHTML}
+                            </div>
                         </div>
                     </div>
-                    <div class="absolute bottom-1 right-10 text-sm font-semibold z-20 text-slate-800">
-                        DATE: <span class="border-b border-dashed border-slate-400 inline-block w-32 text-center pb-0.5">${displayDate}</span>
-                    </div>
-                </div>
-                <div class="px-10 py-3 border-y border-slate-300 mx-6 my-2 text-[13px] font-semibold flex flex-wrap gap-y-3 bg-slate-50 rounded-sm">
-                    <div class="w-full flex items-end">
-                        <span class="mr-2 text-slate-500">NAME:</span>
-                        <span class="flex-grow text-[15px] font-bold text-slate-900 border-b border-dashed border-slate-300 uppercase tracking-wide pb-0.5">${pName}</span>
-                        <span class="ml-4 mr-2 text-slate-500">AGE:</span>
-                        <span class="w-12 text-center border-b border-dashed border-slate-300 pb-0.5">${pAge}</span>
-                        <span class="ml-4 mr-2 text-slate-500">SEX:</span>
-                        <span class="w-12 text-center border-b border-dashed border-slate-300 pb-0.5">${pSex}</span>
-                        <span class="ml-4 mr-2 text-slate-500">WEIGHT:</span>
-                        <span class="w-16 text-center border-b border-dashed border-slate-300 pb-0.5">${pWeight ? pWeight + ' kg' : ''}</span>
-                    </div>
-                    <div class="w-full flex items-end mt-1">
-                        <span class="mr-2 text-slate-500">ADDRESS:</span>
-                        <span class="flex-grow border-b border-dashed border-slate-300 font-normal text-slate-700 pb-0.5">${pAddress}</span>
-                    </div>
-                </div>
-                <div class="px-10 flex relative" style="min-height: 160mm;">
-                    <div class="w-[35%] pr-5 pt-4 border-r border-slate-200 relative flex flex-col gap-5">
-                        ${leftColHtml}
-                    </div>
-                    <div class="w-[65%] pl-6 pt-2 relative flex flex-col">
-                        <div class="text-[3.5rem] font-serif font-bold text-slate-800 leading-none mb-2">Rx</div>
-                        ${rightColHtml}
-                    </div>
-                </div>
-                <div class="absolute bottom-0 w-full px-10 py-5 flex justify-between items-end border-t-[8px] border-cyan-200 bg-white pb-8">
-                    <div class="flex items-center gap-3 w-3/5">
-                        <div class="bg-red-100 rounded-full w-8 h-8 flex justify-center items-center text-red-400 flex-shrink-0">
-                            <i class="fa-solid fa-plus font-bold text-sm"></i>
-                        </div>
-                        <div>
-                            <p class="text-[13px] font-bold text-slate-800 tracking-wide">${docPhone}</p>
-                            <p class="text-[11px] text-slate-600 whitespace-pre-wrap leading-tight mt-0.5">${docAddress}</p>
-                        </div>
-                    </div>
-                    <div class="w-[30%] flex flex-col items-center">
-                        <div class="h-16 w-full border-b border-slate-300 flex justify-center items-end pb-1 relative">
-                            ${sigHtml}
-                        </div>
-                        <p class="text-[12px] mt-1 font-bold text-slate-800">${docName}</p>
-                        <p class="text-[10px] text-slate-500 uppercase tracking-widest">Signature</p>
-                    </div>
-                </div>
-            `;
-            }
-            else if (appState.template === 'modern') {
-                html = `
-                <div class="relative h-[220px] overflow-hidden bg-white">
-                    <div class="absolute top-0 right-0 w-[65%] h-[180px] bg-[#0f766e] rounded-bl-full z-0"></div>
-                    <div class="absolute top-[-50px] left-[-50px] w-[300px] h-[300px] bg-[#ccfbf1] rounded-full z-0"></div>
-                    <div class="absolute top-[130px] left-[50px] w-[120px] h-[120px] bg-[#0f766e] rounded-full z-10 flex justify-center items-center text-white text-[3rem]">
-                        <i class="fa-solid fa-user-doctor drop-shadow-md opacity-90"></i>
-                    </div>
-                    <div class="relative z-20 flex justify-between pt-8 px-10">
-                        <div class="w-32 h-32"></div>
-                        <div class="text-white text-right w-3/5 pt-2 pr-6 leading-snug">
-                            <h1 class="text-3xl font-serif font-bold mb-2 tracking-wide">${docName}</h1>
-                            <p class="text-sm opacity-90 tracking-wide">${docField}</p>
-                            <p class="text-[13px] font-semibold opacity-90 mt-1">${degString}</p>
-                            ${miscHtml}
-                            ${docReg ? `<p class="text-[12px] opacity-80 mt-1">Reg. no.- ${docReg}</p>` : ''}
-                        </div>
-                    </div>
-                    <div class="absolute bottom-1 right-10 text-sm font-semibold z-20 text-slate-800">
-                        DATE: <span class="border-b border-dashed border-slate-400 inline-block w-32 text-center pb-0.5">${displayDate}</span>
-                    </div>
-                </div>
-                <div class="px-10 py-3 border-y border-slate-300 mx-6 my-2 text-[13px] font-semibold flex flex-wrap gap-y-3 bg-slate-50 rounded-sm">
-                    <div class="w-full flex items-end">
-                        <span class="mr-2 text-slate-500">NAME:</span>
-                        <span class="flex-grow text-[15px] font-bold text-slate-900 border-b border-dashed border-slate-300 uppercase tracking-wide pb-0.5">${pName}</span>
-                        <span class="ml-4 mr-2 text-slate-500">AGE:</span>
-                        <span class="w-12 text-center border-b border-dashed border-slate-300 pb-0.5">${pAge}</span>
-                        <span class="ml-4 mr-2 text-slate-500">SEX:</span>
-                        <span class="w-12 text-center border-b border-dashed border-slate-300 pb-0.5">${pSex}</span>
-                        <span class="ml-4 mr-2 text-slate-500">WEIGHT:</span>
-                        <span class="w-16 text-center border-b border-dashed border-slate-300 pb-0.5">${pWeight ? pWeight + ' kg' : ''}</span>
-                    </div>
-                    <div class="w-full flex items-end mt-1">
-                        <span class="mr-2 text-slate-500">ADDRESS:</span>
-                        <span class="flex-grow border-b border-dashed border-slate-300 font-normal text-slate-700 pb-0.5">${pAddress}</span>
-                    </div>
-                </div>
-                <div class="px-10 flex relative" style="min-height: 160mm;">
-                    <div class="w-[35%] pr-5 pt-4 border-r border-slate-200 relative flex flex-col gap-5">
-                        ${leftColHtml}
-                    </div>
-                    <div class="w-[65%] pl-6 pt-2 relative flex flex-col">
-                        <div class="text-[3.5rem] font-serif font-bold text-[#0f766e] leading-none mb-2">Rx</div>
-                        ${rightColHtml}
-                    </div>
-                </div>
-                <div class="absolute bottom-0 w-full px-10 py-5 flex justify-between items-end border-t-[8px] border-[#0f766e] bg-white pb-8">
-                    <div class="flex items-center gap-3 w-3/5">
-                        <div class="bg-[#ccfbf1] rounded-full w-8 h-8 flex justify-center items-center text-[#0f766e] flex-shrink-0">
-                            <i class="fa-solid fa-plus font-bold text-sm"></i>
-                        </div>
-                        <div>
-                            <p class="text-[13px] font-bold text-slate-800 tracking-wide">${docPhone}</p>
-                            <p class="text-[11px] text-slate-600 whitespace-pre-wrap leading-tight mt-0.5">${docAddress}</p>
-                        </div>
-                    </div>
-                    <div class="w-[30%] flex flex-col items-center">
-                        <div class="h-16 w-full border-b border-slate-300 flex justify-center items-end pb-1 relative">
-                            ${sigHtml}
-                        </div>
-                        <p class="text-[12px] mt-1 font-bold text-slate-800">${docName}</p>
-                        <p class="text-[10px] text-slate-500 uppercase tracking-widest">Signature</p>
-                    </div>
-                </div>
-            `;
-            }
-            else if (appState.template === 'editorial') {
-                html = `
-                <div class="px-10 py-10 bg-[#eef2ff] border-b-[4px] border-[#4338ca] relative overflow-hidden">
-                    <div class="absolute right-[-40px] top-[-40px] opacity-10">
-                        <i class="fa-solid fa-briefcase-medical text-[250px] text-[#4338ca]"></i>
-                    </div>
-                    <div class="flex justify-between items-center w-full relative z-10">
-                        <div class="flex-grow">
-                            <h1 class="text-4xl font-extrabold text-[#4338ca] mb-1 tracking-tight">${docName}</h1>
-                            <p class="text-[16px] font-bold text-slate-700 tracking-wide">${docField}</p>
-                            <p class="text-[13px] font-semibold text-slate-600 mt-1">${degString}</p>
-                            ${miscHtmlAlt}
-                        </div>
-                        ${docReg ? `
-                        <div class="flex-shrink-0 bg-white p-3 rounded-xl shadow-sm border border-[#c7d2fe] text-center min-w-[120px]">
-                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">Registration</p>
-                            <p class="text-[13px] font-bold text-[#4338ca]">${docReg}</p>
-                        </div>` : ''}
-                    </div>
-                </div>
-                <div class="mx-8 mt-6 bg-white border border-[#e0e7ff] rounded-2xl p-4 shadow-[0_4px_20px_-10px_rgba(67,56,202,0.15)] relative z-20 flex flex-wrap items-center justify-between text-[13px]">
-                    <div class="w-full mb-3 flex justify-between items-center border-b border-slate-100 pb-2">
-                        <div class="font-bold text-[16px] text-slate-800 uppercase tracking-wide">${pName}</div>
-                        <div class="bg-[#4338ca] text-white px-3 py-1 rounded-full font-bold text-[11px]">${displayDate}</div>
-                    </div>
-                    <div class="flex gap-6 w-full text-slate-600">
-                        <div><span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-0.5">Age</span><span class="font-semibold text-slate-800">${pAge}</span></div>
-                        <div><span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-0.5">Sex</span><span class="font-semibold text-slate-800">${pSex}</span></div>
-                        ${pWeight ? `<div><span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-0.5">Weight</span><span class="font-semibold text-slate-800">${pWeight} kg</span></div>` : ''}
-                        <div class="flex-grow text-right"><span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-0.5">Address</span><span class="font-medium text-slate-700">${pAddress || '-'}</span></div>
-                    </div>
-                </div>
-                <div class="px-10 mt-6 flex relative" style="min-height: 150mm;">
-                    <div class="w-[30%] pr-6 pt-2 border-r border-slate-200 flex flex-col gap-5">
-                        ${leftColHtml}
-                    </div>
-                    <div class="w-[70%] pl-8 pt-0 flex flex-col">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="bg-[#4338ca] text-white w-10 h-10 rounded-lg flex justify-center items-center font-serif text-2xl font-bold italic">Rx</div>
-                            <div class="h-px bg-slate-200 flex-grow"></div>
-                        </div>
-                        ${rightColHtml}
-                    </div>
-                </div>
-                <div class="absolute bottom-0 w-full px-10 py-6 bg-slate-50 border-t border-slate-200 flex justify-between items-end pb-8">
-                    <div class="w-1/2">
-                        <div class="flex items-center gap-2 mb-1">
-                            <i class="fa-solid fa-phone text-[#4338ca] text-sm"></i>
-                            <span class="text-[12px] font-bold text-slate-700">${docPhone}</span>
-                        </div>
-                        <div class="flex items-start gap-2">
-                            <i class="fa-solid fa-location-dot text-[#4338ca] text-sm mt-0.5"></i>
-                            <span class="text-[11px] text-slate-600 font-medium">${docAddress}</span>
-                        </div>
-                    </div>
-                    <div class="w-[30%] flex flex-col items-center">
-                        <div class="h-16 w-full border-b-2 border-slate-300 flex justify-center items-end pb-1 relative">
-                            ${sigHtml}
-                        </div>
-                        <p class="text-[12px] mt-2 font-bold text-slate-700">${docName}</p>
-                        <p class="text-[10px] text-slate-500 uppercase tracking-widest">Signature</p>
-                    </div>
-                </div>
-            `;
-            }
-            else if (appState.template === 'compact') {
-                html = `
-                <div class="px-8 pt-8 pb-3 border-b-2 border-[#374151] flex justify-between items-end bg-white">
-                    <div>
-                        <h1 class="text-2xl font-bold text-[#374151] uppercase tracking-tight leading-none mb-1">${docName}</h1>
-                        <p class="text-[12px] font-bold text-slate-600 uppercase tracking-widest">${docField}</p>
-                        <p class="text-[11px] font-medium text-slate-500 mt-0.5">${degString}${docReg ? ' | Reg: ' + docReg : ''}</p>
-                        ${miscHtmlAlt}
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[11px] font-bold text-slate-600"><i class="fa-solid fa-phone mr-1"></i>${docPhone}</p>
-                        <p class="text-[10px] text-slate-500 max-w-[200px] truncate mt-0.5">${docAddress.replace(/\n/g, ', ')}</p>
-                    </div>
-                </div>
-                <div class="px-8 py-2 border-b border-slate-200 bg-slate-50 flex items-center justify-between text-[11px] font-medium uppercase tracking-wider text-slate-600">
-                    <div><span class="font-bold text-slate-800">${pName}</span> &nbsp;|&nbsp; ${pAge} / ${pSex} &nbsp;|&nbsp; ${pWeight ? pWeight + ' kg' : ''}</div>
-                    <div>DATE: <span class="font-bold text-slate-800">${displayDate}</span></div>
-                </div>
-                <div class="px-8 pt-4 flex relative" style="min-height: 180mm;">
-                    <div class="w-[30%] pr-4 border-r border-slate-200 flex flex-col gap-4">
-                        ${leftColHtml}
-                    </div>
-                    <div class="w-[70%] pl-5 pt-0 flex flex-col">
-                        <div class="text-2xl font-serif font-bold text-[#374151] mb-2 border-b border-slate-200 pb-1">Rx</div>
-                        ${rightColHtml}
-                    </div>
-                </div>
-                <div class="absolute bottom-0 w-full px-8 py-4 bg-white flex justify-end items-end pb-6 border-t border-slate-200">
-                    <div class="w-[25%] flex flex-col items-center">
-                        <div class="h-12 w-full border-b border-slate-400 flex justify-center items-end pb-1 relative">
-                            ${sigHtml}
-                        </div>
-                        <p class="text-[11px] mt-1 font-bold text-slate-700">${docName}</p>
-                        <p class="text-[9px] text-slate-500 uppercase tracking-widest">Signature</p>
-                    </div>
-                </div>
-            `;
-            }
-            else if (appState.template === 'classic') {
-                html = `
-                <div class="relative pt-12 pb-6 px-12 bg-white text-center border-b-[3px] border-[#1e293b]">
-                    <h1 class="text-4xl font-serif font-bold text-[#1e293b] tracking-wider mb-2 uppercase">${docName}</h1>
-                    <p class="text-[15px] font-serif font-semibold text-slate-700 tracking-widest uppercase mb-1">${docField}</p>
-                    <p class="text-[13px] font-serif text-slate-600 mb-1">${degString}</p>
-                    ${miscHtmlAlt}
-                    ${docReg ? `<p class="text-[12px] font-serif text-slate-500">Reg: ${docReg}</p>` : ''}
-                </div>
-                <div class="px-12 py-4 flex justify-between items-end">
-                    <div class="text-[13px] font-serif font-semibold text-[#1e293b]">
-                        Date: <span class="ml-2 font-normal border-b border-slate-400 inline-block w-24 text-center pb-0.5">${displayDate}</span>
-                    </div>
-                </div>
-                <div class="mx-12 border border-[#1e293b] p-3 mb-6 text-[13px] font-serif bg-slate-50/50">
-                    <div class="grid grid-cols-4 gap-y-2 gap-x-4">
-                        <div class="col-span-4 md:col-span-2 flex"><span class="font-bold mr-2 text-[#1e293b]">Name:</span> <span class="flex-grow border-b border-slate-300 font-sans uppercase pl-2">${pName}</span></div>
-                        <div class="flex"><span class="font-bold mr-2 text-[#1e293b]">Age:</span> <span class="flex-grow border-b border-slate-300 font-sans text-center">${pAge}</span></div>
-                        <div class="flex"><span class="font-bold mr-2 text-[#1e293b]">Sex:</span> <span class="flex-grow border-b border-slate-300 font-sans text-center">${pSex}</span></div>
-                        <div class="col-span-4 flex"><span class="font-bold mr-2 text-[#1e293b]">Address:</span> <span class="flex-grow border-b border-slate-300 font-sans pl-2">${pAddress}</span></div>
-                    </div>
-                </div>
-                <div class="px-12 flex relative" style="min-height: 160mm;">
-                    <div class="w-[30%] pr-6 pt-2 border-r-2 border-[#1e293b] flex flex-col gap-6">
-                        ${leftColHtml}
-                    </div>
-                    <div class="w-[70%] pl-8 pt-0 flex flex-col">
-                        <div class="text-[4rem] font-serif font-bold text-[#1e293b] leading-none mb-4 italic">Rx</div>
-                        ${rightColHtml}
-                    </div>
-                </div>
-                <div class="absolute bottom-0 w-full px-12 py-6 flex justify-between items-end border-t border-[#1e293b] bg-white pb-8">
-                    <div class="w-3/5 font-serif">
-                        <p class="text-[12px] font-bold text-[#1e293b] uppercase tracking-widest mb-1">Clinic Contact</p>
-                        <p class="text-[12px] text-slate-700 font-semibold">${docPhone}</p>
-                        <p class="text-[11px] text-slate-600 whitespace-pre-wrap leading-relaxed">${docAddress}</p>
-                    </div>
-                    <div class="w-[30%] flex flex-col items-center">
-                        <div class="h-16 w-full border-b border-slate-800 flex justify-center items-end pb-1 relative">
-                            ${sigHtml}
-                        </div>
-                        <p class="text-[13px] mt-2 font-serif font-bold text-[#1e293b]">${docName}</p>
-                        <p class="text-[11px] mt-0.5 font-serif text-slate-600 uppercase tracking-widest">Signature</p>
-                    </div>
-                </div>
-            `;
+                    ${buildFooterHTML()}
+                </div>`;
+
+                currentPageNum++;
             }
 
-            document.getElementById('prescription-print').innerHTML = html;
+            container.innerHTML = masterHTML;
 
-            // Execute dynamic scaling calculation immediately after DOM injection
-            setTimeout(adjustScale, 50);
+            // Secure custom dynamic mobile responsiveness scales immediately after node attachment pass
+            if (typeof adjustScale === 'function') {
+                setTimeout(adjustScale, 50);
+            }
         }
 
 
@@ -2735,81 +2817,168 @@
 
         // --- PDF Export ---
         function downloadPDF() {
-            const scaleContainer = document.getElementById('scale-container');
-            const wrapper = document.getElementById('print-wrapper');
             const element = document.getElementById('prescription-print');
+            if (!element) return;
 
-            // Secure original visual state
-            const originalTransform = scaleContainer.style.transform;
-            const originalHeight = wrapper.style.height;
+            // 1. Isolate the environment by hiding the existing app UI
+            // This guarantees no parent containers, flex layouts, or scroll bounds can interfere with the PDF capture
+            const children = Array.from(document.body.children);
+            const originalDisplays = new Map();
+            children.forEach(child => {
+                if (child.tagName !== 'SCRIPT' && child.id !== 'signature-modal') {
+                    originalDisplays.set(child, child.style.display);
+                    child.style.display = 'none';
+                }
+            });
 
-            // Force element to absolute 100% true native scale for crisp html2canvas capture
-            scaleContainer.style.transform = 'scale(1)';
-            wrapper.style.height = 'auto';
+            // 2. Strip body clipping constraints so it can physically expand to the full multi-page height
+            const originalBodyClasses = document.body.className;
+            document.body.className = "bg-white font-sans";
+            document.body.style.overflow = 'visible';
+            document.body.style.height = 'auto';
 
-            // Force synchronous browser layout recalculation before capturing
-            void element.offsetHeight;
+            // 3. Create a dedicated, perfect wrapper for our layout clone
+            const captureContainer = document.createElement('div');
+            captureContainer.style.width = '210mm'; // Exact A4 width
+            captureContainer.style.margin = '0';
+            captureContainer.style.padding = '0';
+            captureContainer.style.background = 'white';
+
+            // 4. Clone the layout perfectly
+            const clone = element.cloneNode(true);
+            // Strip the vertical gaps to prevent PDF overflow pages
+            clone.classList.remove('gap-4', 'pb-8');
+            clone.style.transform = 'scale(1)';
+
+            // CRITICAL: Strip the margin-bottom from the individual pages inside the clone!
+            const pages = clone.querySelectorAll('.prescription-page');
+            pages.forEach((page, idx) => {
+                page.classList.remove('mb-8');
+                page.style.marginBottom = '0';
+
+                // Anti-Ghost-Page trick: Reduce the height of the VERY LAST page by 1mm.
+                // This prevents browser sub-pixel floating point math from pushing the total canvas 
+                // height to something like 594.01mm, which forces jsPDF to spawn an empty 3rd page.
+                if (idx === pages.length - 1) {
+                    page.style.height = '296mm';
+                    page.style.overflow = 'hidden';
+                }
+            });
+
+            captureContainer.appendChild(clone);
+
+            document.body.appendChild(captureContainer);
+
+            const patientName = appState.patient.name.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'patient';
+
+            // 5. Configure html2pdf to grab the exact 210mm container
+            const opt = {
+                margin: 0,
+                filename: `Prescription_${patientName}.pdf`,
+                image: { type: 'jpeg', quality: 1.0 },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    scrollY: 0
+                },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            const noPrintEls = clone.querySelectorAll('.no-print');
+            noPrintEls.forEach(el => el.style.display = 'none');
+
+            // 6. Wait 500ms for browser to natively paint the clean isolated clone layout
+            setTimeout(() => {
+                html2pdf().set(opt).from(captureContainer).save().then(() => {
+                    // Cleanup and restore UI
+                    document.body.removeChild(captureContainer);
+                    document.body.className = originalBodyClasses;
+                    document.body.style.overflow = '';
+                    document.body.style.height = '';
+
+                    for (const [child, display] of originalDisplays.entries()) {
+                        child.style.display = display;
+                    }
+                }).catch(err => {
+                    console.error("PDF generation pipeline exception error trace:", err);
+                    document.body.removeChild(captureContainer);
+                    document.body.className = originalBodyClasses;
+                    document.body.style.overflow = '';
+                    document.body.style.height = '';
+                    for (const [child, display] of originalDisplays.entries()) {
+                        child.style.display = display;
+                    }
+                });
+            }, 500);
+        }
+
+        document.getElementById('btn-share').addEventListener('click', async () => {
+            const element = document.getElementById('prescription-print');
+            if (!element) return;
+
+            // 1. Isolate the environment by hiding the existing app UI
+            const children = Array.from(document.body.children);
+            const originalDisplays = new Map();
+            children.forEach(child => {
+                if (child.tagName !== 'SCRIPT' && child.id !== 'signature-modal') {
+                    originalDisplays.set(child, child.style.display);
+                    child.style.display = 'none';
+                }
+            });
+
+            // 2. Strip body clipping constraints
+            const originalBodyClasses = document.body.className;
+            document.body.className = "bg-white font-sans";
+            document.body.style.overflow = 'visible';
+            document.body.style.height = 'auto';
+
+            // 3. Create wrapper for layout clone
+            const captureContainer = document.createElement('div');
+            captureContainer.style.width = '210mm';
+            captureContainer.style.margin = '0';
+            captureContainer.style.padding = '0';
+            captureContainer.style.background = 'white';
+
+            // 4. Clone and clean layout perfectly
+            const clone = element.cloneNode(true);
+            clone.classList.remove('gap-4', 'pb-8');
+            clone.style.transform = 'scale(1)';
+
+            const pages = clone.querySelectorAll('.prescription-page');
+            pages.forEach((page, idx) => {
+                page.classList.remove('mb-8');
+                page.style.marginBottom = '0';
+                if (idx === pages.length - 1) {
+                    page.style.height = '296mm';
+                    page.style.overflow = 'hidden';
+                }
+            });
+
+            captureContainer.appendChild(clone);
+            document.body.appendChild(captureContainer);
 
             const patientName = appState.patient.name.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'patient';
 
             const opt = {
                 margin: 0,
                 filename: `Prescription_${patientName}.pdf`,
-                image: { type: 'jpeg', quality: 1 },
+                image: { type: 'jpeg', quality: 1.0 },
                 html2canvas: { scale: 2, useCORS: true, logging: false, scrollY: 0 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            // Hide scrollbars and interface elements to avoid capturing them
-            document.body.style.overflow = 'hidden';
-            const noPrintEls = document.querySelectorAll('.no-print');
-            noPrintEls.forEach(el => el.style.display = 'none');
-
-            html2pdf().set(opt).from(element).save().then(() => {
-                // Restore visual application state once capture is fully complete
-                document.body.style.overflow = '';
-                noPrintEls.forEach(el => el.style.display = '');
-
-                // Re-apply viewport mobile scaling
-                scaleContainer.style.transform = originalTransform;
-                wrapper.style.height = originalHeight;
-            });
-        }
-
-        document.getElementById('btn-share').addEventListener('click', async () => {
-            const element = document.getElementById('prescription-print'); // Target layout container
-            
-            const scaleContainer = document.getElementById('scale-container');
-            const wrapper = document.getElementById('print-wrapper');
-            const originalTransform = scaleContainer.style.transform;
-            const originalHeight = wrapper.style.height;
-            scaleContainer.style.transform = 'scale(1)';
-            wrapper.style.height = 'auto';
-            void element.offsetHeight;
-            
-            const patientName = appState.patient.name.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'patient';
-            
-            // Configure layout parameters matching your existing printing rules
-            const opt = {
-                margin:       0,
-                filename:     `Prescription_${patientName}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, logging: false, scrollY: 0 },
-                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
-            };
-
-            document.body.style.overflow = 'hidden';
-            const noPrintEls = document.querySelectorAll('.no-print');
+            const noPrintEls = clone.querySelectorAll('.no-print');
             noPrintEls.forEach(el => el.style.display = 'none');
 
             try {
-                // Generate raw PDF Blob asset
-                const pdfBlob = await html2pdf()
-                    .set(opt)
-                    .from(element)
-                    .toPdf()
-                    .output('blob');
-                
+                // Generate raw PDF Blob asset after a 500ms browser paint delay
+                const pdfBlob = await new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        html2pdf().set(opt).from(captureContainer).output('blob').then(resolve).catch(reject);
+                    }, 500);
+                });
+
                 // Wrap blob in a standard File object
                 const pdfFile = new File([pdfBlob], `Prescription_${patientName}.pdf`, { type: "application/pdf" });
 
@@ -2824,16 +2993,12 @@
                 } else {
                     // PC/Fallback Path: Trigger automatic download seamlessly
                     console.log("Direct sharing unsupported (PC/HTTP environment). Falling back to local download loop.");
-                    
                     const downloadUrl = URL.createObjectURL(pdfBlob);
                     const downloadLink = document.createElement('a');
                     downloadLink.href = downloadUrl;
                     downloadLink.download = `Prescription_${patientName}.pdf`;
-                    
                     document.body.appendChild(downloadLink);
                     downloadLink.click();
-                    
-                    // Cleanup memory allocation
                     document.body.removeChild(downloadLink);
                     URL.revokeObjectURL(downloadUrl);
                 }
@@ -2841,10 +3006,14 @@
                 console.error("Error running application sharing layout execution logic:", error);
                 alert("An error occurred while preparing the prescription document file package.");
             } finally {
+                // Cleanup memory allocation and restore UI
+                document.body.removeChild(captureContainer);
+                document.body.className = originalBodyClasses;
                 document.body.style.overflow = '';
-                noPrintEls.forEach(el => el.style.display = '');
-                scaleContainer.style.transform = originalTransform;
-                wrapper.style.height = originalHeight;
+                document.body.style.height = '';
+                for (const [child, display] of originalDisplays.entries()) {
+                    child.style.display = display;
+                }
             }
         });
     </script>
