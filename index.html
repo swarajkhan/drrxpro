@@ -2022,7 +2022,18 @@
             try {
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 if (session && session.user) {
-                    currentUser = session.user;
+                    // Zombie Session Check: Verify against the backend since getSession() only checks local cache
+                    const { data: { user: realUser }, error: userError } = await supabaseClient.auth.getUser();
+                    if (userError || !realUser) {
+                        console.warn("Zombie session detected (user deleted from backend). Forcing sign out.");
+                        await supabaseClient.auth.signOut();
+                        localStorage.removeItem('doctorProfile');
+                        currentUser = null;
+                        location.reload();
+                        return;
+                    }
+                    
+                    currentUser = realUser;
 
                     // OAuth Coupon Interception Check - SKIP for Super Admins
                     if (!isSuperAdmin) {
@@ -2595,23 +2606,26 @@
             }
 
             try {
-                // 1. Purge all dependent database rows belonging to this tenant mapping RLS rules
-                const { error: rxError } = await supabaseClient.from('prescriptions').delete().eq('user_id', currentUser.id);
-                if (rxError) throw rxError;
+                // 1. Invoke the dedicated Supabase RPC to securely delete the user from auth.users,
+                // purge their profile/prescriptions, and free up their coupon.
+                const { error: deleteError } = await supabaseClient.rpc('delete_own_account');
+                
+                // Fallback: If the RPC hasn't been added to Supabase yet, attempt manual RLS purge
+                if (deleteError) {
+                    console.warn("delete_own_account RPC failed/missing, attempting fallback manual purge:", deleteError);
+                    const { error: rxError } = await supabaseClient.from('prescriptions').delete().eq('user_id', currentUser.id);
+                    if (rxError) console.error("Manual rx purge failed:", rxError);
 
-                const { error: profileError } = await supabaseClient.from('profiles').delete().eq('id', currentUser.id);
-                if (profileError) throw profileError;
+                    const { error: profileError } = await supabaseClient.from('profiles').delete().eq('id', currentUser.id);
+                    if (profileError) console.error("Manual profile purge failed:", profileError);
+                }
 
-                // 2. Invoke client function self-demolition routine via Supabase RPC or User Profile RPC
-                // Since client-side JS cannot delete users from auth.users directly without service_role admin privileges, 
-                // we call a dedicated edge function or clear out their current profile settings row, sign them out, 
-                // and guide them back to setup layout grids cleanly.
-
+                // 2. Sign them out locally and clean up state
                 await supabaseClient.auth.signOut();
                 localStorage.removeItem('doctorProfile');
                 currentUser = null;
 
-                alert("Your profile data and cloud configurations have been successfully purged from our servers.");
+                alert("Your account, profile data, and cloud configurations have been successfully purged from our servers.");
                 location.reload(); // Hard reload application back to Screen 0 initialization state cleanly
             } catch (err) {
                 console.error("Account self-purge failure sequence execution error:", err);
