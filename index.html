@@ -1789,10 +1789,33 @@
                         isSuperAdmin = true;
                         superAdminCreds = { email, password };
                         localStorage.setItem('superAdminCreds', JSON.stringify(superAdminCreds));
+                        
+                        // Attempt to establish a normal Supabase Auth session so RLS allows profile/prescription access
+                        let adminHasNormalSession = false;
+                        
+                        // 1. Check if there's already an active session (e.g. from Google OAuth)
+                        const { data: { session: existingAdminSession } } = await supabaseClient.auth.getSession();
+                        if (existingAdminSession && existingAdminSession.user) {
+                            adminHasNormalSession = true;
+                            currentUser = existingAdminSession.user;
+                        } else {
+                            // 2. Try signing in with the admin password (works if it matches the user password)
+                            const { data: signInData, error: signInError } = await supabaseClient.auth.signInWithPassword({ email, password });
+                            if (!signInError && signInData?.session) {
+                                adminHasNormalSession = true;
+                                currentUser = signInData.session.user;
+                            }
+                        }
+
                         toggleAuthModal(false);
 
                         document.getElementById('nav-super-admin-btn').classList.remove('hidden');
-                        document.getElementById('nav-cloud-btn').classList.add('hidden');
+                        
+                        if (adminHasNormalSession) {
+                            document.getElementById('nav-cloud-btn').classList.add('hidden');
+                        } else {
+                            document.getElementById('nav-cloud-btn').classList.remove('hidden');
+                        }
 
                         const backupBtn = document.getElementById('btn-backup-cloud');
                         if (backupBtn) backupBtn.classList.add('hidden');
@@ -1803,8 +1826,34 @@
                         document.getElementById('nav-logout-btn').innerHTML = '<i class="fa-solid fa-sign-out-alt w-5 text-center mr-2"></i> Sign Out';
                         document.getElementById('nav-actions').classList.remove('hidden');
                         document.getElementById('nav-actions').classList.add('flex');
+                        document.getElementById('nav-edit-btn').classList.remove('hidden');
 
-                        // Set greeting
+                        // If we have a normal session, load user profile data
+                        if (adminHasNormalSession && currentUser) {
+                            const { data: adminProfile } = await supabaseClient.from('profiles').select('settings').eq('id', currentUser.id).single();
+                            if (adminProfile && adminProfile.settings) {
+                                appState.doctor = adminProfile.settings;
+                                localStorage.setItem('doctorProfile', JSON.stringify(appState.doctor));
+                                loadDoctorProfile();
+                            }
+                            if (typeof fetchSavedPrescriptions === 'function') {
+                                document.getElementById('archives-dashboard')?.classList.remove('hidden');
+                                document.getElementById('btn-save-cloud')?.classList.remove('hidden');
+                                fetchSavedPrescriptions();
+                            }
+                            const delBtn = document.getElementById('nav-delete-account-btn');
+                            if (delBtn) delBtn.classList.remove('hidden');
+                        } else {
+                            // No normal session could be established - prompt user
+                            // Show auth modal in a special "link account" mode
+                            setTimeout(() => {
+                                if (!currentUser) {
+                                    alert('Admin verified! To access your user profile and cloud data, please also sign in with your normal account credentials (or Google) from the Cloud Workspace button.');
+                                }
+                            }, 500);
+                        }
+
+                        // Set greeting (always override to Super Admin)
                         document.getElementById('doctor-greeting').innerText = `Super Admin`;
 
                         // Load Dashboard automatically
@@ -1945,14 +1994,28 @@
                         document.getElementById('nav-logout-btn').innerHTML = '<i class="fa-solid fa-sign-out-alt w-5 text-center mr-2"></i> Sign Out';
                         document.getElementById('nav-actions').classList.remove('hidden');
                         document.getElementById('nav-actions').classList.add('flex');
-                        document.getElementById('doctor-greeting').innerText = `Super Admin`;
-                        return; // Bypass normal auth
+                        
+                        // Try to silently establish a Supabase Auth session if none exists
+                        const { data: { session: adminExistingSession } } = await supabaseClient.auth.getSession();
+                        if (!adminExistingSession) {
+                            // No existing session - try signing in with stored admin creds
+                            const { data: silentData, error: silentErr } = await supabaseClient.auth.signInWithPassword({ email: creds.email, password: creds.password });
+                            if (!silentErr && silentData?.session) {
+                                currentUser = silentData.session.user;
+                            }
+                        } else {
+                            currentUser = adminExistingSession.user;
+                        }
+                        
+                        // Falls through to normal session handling below
                     } else {
+                        // Explicitly not an admin (credentials changed/removed from DB)
                         localStorage.removeItem('superAdminCreds');
                     }
                 } catch (e) {
-                    console.error("Super Admin check failed", e);
-                    localStorage.removeItem('superAdminCreds');
+                    // Network error / RPC failure - do NOT remove credentials
+                    // The admin session is preserved; we'll retry on next refresh
+                    console.error("Super Admin check failed (network/RPC error, keeping session)", e);
                 }
             }
 
@@ -1961,23 +2024,24 @@
                 if (session && session.user) {
                     currentUser = session.user;
 
-                    // OAuth Coupon Interception Check
-                    // We check if the user has a valid coupon using the RPC
-                    try {
-                        const { data: hasCoupon, error: couponErr } = await supabaseClient.rpc('check_user_has_coupon', { p_email: currentUser.email });
-                        if (couponErr) throw couponErr;
+                    // OAuth Coupon Interception Check - SKIP for Super Admins
+                    if (!isSuperAdmin) {
+                        try {
+                            const { data: hasCoupon, error: couponErr } = await supabaseClient.rpc('check_user_has_coupon', { p_email: currentUser.email });
+                            if (couponErr) throw couponErr;
 
-                        if (!hasCoupon && currentUser.id) {
-                            // User is signed in but has not provided a coupon!
-                            // Show interceptor UI
-                            document.getElementById('auth-modal').classList.remove('hidden');
-                            document.getElementById('auth-modal-content').classList.add('hidden');
-                            document.getElementById('oauth-interceptor').classList.remove('hidden');
-                            return; // Halt normal login flow
+                            if (!hasCoupon && currentUser.id) {
+                                // User is signed in but has not provided a coupon!
+                                // Show interceptor UI
+                                document.getElementById('auth-modal').classList.remove('hidden');
+                                document.getElementById('auth-modal-content').classList.add('hidden');
+                                document.getElementById('oauth-interceptor').classList.remove('hidden');
+                                return; // Halt normal login flow
+                            }
+                        } catch (err) {
+                            console.error("Error checking coupon status:", err);
+                            return; // Halt on error
                         }
-                    } catch (err) {
-                        console.error("Error checking coupon status:", err);
-                        return; // Halt on error
                     }
 
                     // Update UI for logged in state
@@ -1994,7 +2058,9 @@
                     if (profile && profile.settings) {
                         appState.doctor = profile.settings;
                         localStorage.setItem('doctorProfile', JSON.stringify(appState.doctor));
-                        updateDoctorGreeting();
+                        if (!isSuperAdmin) {
+                            updateDoctorGreeting();
+                        }
                         loadDoctorProfile(); // re-hydrate form inputs visually
                     }
 
@@ -2005,32 +2071,45 @@
                     }
 
                     // If no profile, ensure they go to screen-1
-                    if (!appState.doctor.name) {
-                        setScreen('screen-1');
+                    if (!isSuperAdmin) {
+                        if (!appState.doctor.name) {
+                            setScreen('screen-1');
+                        } else {
+                            setScreen('screen-2');
+                        }
                     } else {
-                        setScreen('screen-2');
+                        // Admin with a valid session: re-assert admin greeting
+                        document.getElementById('doctor-greeting').innerText = `Super Admin`;
                     }
                 } else {
                     currentUser = null;
-                    document.getElementById('nav-cloud-btn').classList.remove('hidden');
-                    document.getElementById('btn-backup-cloud')?.classList.remove('hidden');
-                    document.getElementById('login-prompt-container')?.classList.remove('hidden');
-                    document.getElementById('nav-edit-btn').classList.remove('hidden');
-                    document.getElementById('nav-logout-btn').innerHTML = '<i class="fa-solid fa-sign-out-alt"></i> Reset Profile';
-                    const delBtn = document.getElementById('nav-delete-account-btn');
-                    if (delBtn) delBtn.classList.add('hidden');
+                    if (!isSuperAdmin) {
+                        document.getElementById('nav-cloud-btn').classList.remove('hidden');
+                        document.getElementById('btn-backup-cloud')?.classList.remove('hidden');
+                        document.getElementById('login-prompt-container')?.classList.remove('hidden');
+                        document.getElementById('nav-edit-btn').classList.remove('hidden');
+                        document.getElementById('nav-logout-btn').innerHTML = '<i class="fa-solid fa-sign-out-alt"></i> Reset Profile';
+                        const delBtn = document.getElementById('nav-delete-account-btn');
+                        if (delBtn) delBtn.classList.add('hidden');
 
-                    // Route to Gatekeeper Screen 0 if unauthenticated and no local profile
-                    if (!appState.doctor.name) {
-                        setScreen('screen-0');
+                        // Route to Gatekeeper Screen 0 if unauthenticated and no local profile
+                        if (!appState.doctor.name) {
+                            setScreen('screen-0');
+                        } else {
+                            // Guest mode active
+                            setScreen('screen-2');
+                        }
                     } else {
-                        // Guest mode active, let them continue in their current flow (screen-1 or screen-2)
-                        setScreen('screen-2'); // default to pad if they have local profile
+                        // Super Admin is valid but has no normal Supabase session
+                        // Admin panel still works, just no profile data
+                        document.getElementById('doctor-greeting').innerText = `Super Admin`;
+                        // Ensure Cloud Workspace button remains visible so they can authenticate
+                        document.getElementById('nav-cloud-btn').classList.remove('hidden');
                     }
                 }
             } catch (e) {
                 console.error("Session check failed", e);
-                if (!appState.doctor.name) setScreen('screen-0');
+                if (!isSuperAdmin && !appState.doctor.name) setScreen('screen-0');
             }
         }
 
@@ -2611,8 +2690,9 @@
         }
 
         function setScreen(screenId) {
-            ['screen-0', 'screen-1', 'screen-2', 'screen-3', 'screen-4'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
+            ['screen-0', 'screen-1', 'screen-2', 'screen-3', 'screen-4', 'screen-5'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
             });
             document.getElementById(screenId).classList.remove('hidden');
             window.scrollTo(0, 0);
