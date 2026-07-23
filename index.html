@@ -4103,6 +4103,11 @@
                 clone.style.transform = 'scale(1)';
                 clone.style.marginBottom = '0';
 
+                // CRITICAL: Remove min-height from the clone so the container shrinks to actual content.
+                // The modal-print-container has min-h-[297mm] set for display purposes, but this causes
+                // jsPDF to see a taller-than-needed canvas and generate a blank extra page for short prescriptions.
+                clone.style.minHeight = '0';
+                clone.style.height = 'auto';
 
                 // CRITICAL: Strip the margin-bottom from the individual pages inside the clone!
                 const pages = clone.querySelectorAll('.prescription-page');
